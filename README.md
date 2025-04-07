@@ -1,244 +1,152 @@
-🚀 Kodtest: CosmoCargo™ – Intergalaktisk Fraktcentral 
 
-Bakgrund 
+```markdown
+# 🚀 Kodtest: CosmoCargo™ – Intergalaktisk Fraktcentral
 
-CosmoCargo™ är den ledande aktören inom rymdlogistik. Med leveranser till över 9000 rymdstationer i galaxen finns ett sofistikerat system på plats för att hantera bokningar. 
+## 🪐 Bakgrund
 
-Du har blivit anlitad för att bygga en ny feature i CosmoCargo-plattformen, med fokus på användarvänlighet, tydlig struktur och god kodkvalitet. Systemet används av kunder, piloter och administratörer. 
+**CosmoCargo™** är den ledande aktören inom rymdlogistik, med leveranser till över 9000 rymdstationer. Ett sofistikerat bokningssystem används av **kunder**, **piloter** och **administratörer**. Du har blivit anlitad för att bygga en ny feature med fokus på användarvänlighet, tydlig struktur och god kodkvalitet.
 
- 
+---
 
-🛠️ Funktionella krav 
+## 🛠️ Funktionella krav
 
-🎨 Frontend 
+### 🎨 Frontend
 
-Inloggning/registrering med olika roller: Kund, Pilot, Admin 
+#### 🔐 Inloggning & Roller
+- Inloggning/registrering för tre roller: **Kund**, **Pilot**, **Admin**
 
-Kund vy: 
+#### 👩‍🚀 Kundvy
+- Skapa en frakt via formulär (avsändare, mottagare, vikt, kategori, prioritet)
+- Se pågående och tidigare leveranser
+- Spåra paket i realtid (simulerad status)
 
-Som kund kan man boka/skapa en frakt genom att fylla i ett formulär (avsändare, mottagare, vikt, kategori, prioritet) 
+#### 🚀 Pilotvy
+- Se tilldelade frakter (status, datum, destination)
+- Uppdatera status: *påbörjad*, *pågående*, *levererad*
 
-Man kan se sina pågående och tidigare leveranser 
+#### 🧑‍💼 Admin Dashboard
+- Se alla frakter med filterfunktionalitet
+- Tilldela pilot till frakt
+- Ändra status till “Lost in Black Hole”
 
-Spåra ett paket i realtid (simulerad status) 
+---
 
-Pilot vy: 
+## 📄 Tullformulär: "Galactic Cargo Declaration"
 
-Som pilot kan man se sina tilldelade frakter. Då visas status, datum och destination. 
+Universum inför intergalaktiska tullar – ett nytt system krävs.
 
-Som pilot kan man markera en frakt som "påbörjad", "pågående", "levererad" 
- 
+### Funktionalitet
+- **Kund**: Skickar in tullformulär vid bokning
+- **Admin**: Granskar formuläret
+- **Pilot**: Ser om frakten är högriskklassad
 
-Admin dashboard: 
+---
 
-Som admin ser man alla frakter, de ska kunna filtreras på olika parametrar. 
+## 🧩 Formulärfält
 
-En admin ska kunna tilldela en pilot till en frakt. 
+| Fält | Typ | Beskrivning |
+|------|-----|-------------|
+| `shipmentId` | UUID | Referens till frakten |
+| `containsLifeforms` | Boolean | Innehåller levande varelser |
+| `lifeformType` | Text | (Om ja) Beskrivning av art, intelligens, riskklass |
+| `isPlasmaActive` | Boolean | Innehåller plasma-aktiva material |
+| `plasmaStabilityLevel` | Number (1–10) | Stabilitetsskala (om plasmaaktiv) |
+| `originPlanetLawsConfirmed` | Checkbox | Intygande om laglig export |
+| `quarantineRequired` | Boolean | Kräver karantänzon vid ankomst |
+| `customsNotes` | Textarea | Frivillig kommentar |
+| `submittedBy` | Auto | Användare kopplas automatiskt |
 
-Admin ska även kunna ge den status “lost in black hole”. 
+---
 
- 
+## 🛡️ Valideringsregler
 
- 
+- `containsLifeforms === true` ⇒ `lifeformType` är obligatoriskt
+- `isPlasmaActive === true` ⇒ `plasmaStabilityLevel` måste anges (1–10)
+- `plasmaStabilityLevel < 4` ⇒ `quarantineRequired` måste vara true
+- `originPlanetLawsConfirmed` måste vara ikryssad
+- Textfält har begränsningar (säkerhet)
 
-📝 Uppgift Tullformulär: “Galactic Cargo Declaration” 
+---
 
-Universum står inför ett handelskrig och inför intergalaktiska tullar. CosmoCargo behöver ta fram ett system för tullhantering. 
+## 💥 Automatiserad Riskbedömning
 
-Kund skickar in tullformulär i samband med att man bokar frakt. 
+Bygg en funktion som klassificerar risknivå baserat på tullformulär.
 
-Admin ska kunna granska tullformulären.  
+### Riskklassificering
 
-Piloten ska kunna se om frakten är högriskklassad 
+| Villkor | Risknivå |
+|---------|----------|
+| Plasmaaktiv + stabilitet < 5 + livsform | 🔴 Kritisk |
+| Livsform + okänd art | 🔶 Hög |
+| Plasmaaktiv med stabilitet 5–7 | 🟡 Medel |
+| Inga specialegenskaper | 🟢 Låg |
 
- 
+---
 
-🧩 Formulärfält 
+## 🔧 Backend
 
-Fält 
+### Funktionalitet
+- Autentisering via JWT eller liknande
+- REST API eller GraphQL för:
+  - Fraktbokning
+  - Fraktstatus
+  - Roller & auth
+  - Tullformulär
 
-Typ 
+### Fraktdata innehåller
+- ID, avsändare, destination, vikt, typ, risknivå, status
 
-Beskrivning 
+### Statusuppdatering
+- Simulerad statusförändring över tid (t.ex. cron-jobb)
 
-shipmentId 
+---
 
-UUID 
+## 🗄️ Databas
 
-Referens till det aktuella fraktobjektet 
+**Förslag:** PostgreSQL eller MongoDB
 
-containsLifeforms 
+### Modeller
+- `User`
+- `Shipment`
+- `TollForm`
 
-Boolean 
+---
 
-Anger om frakten innehåller levande varelser 
+## ⚙️ Infrastruktur & DevOps
 
-lifeformType 
+- Dockerisera hela stacken (frontend, backend, databas)
+- Använd `docker-compose.yml` för enkel uppstart
+- CI/CD med GitHub Actions:
+  - Linting
+  - Tester (minst enhetstester på backend)
+  - Bygg & deploy till moln (Railway, Vercel etc.)
 
-Text 
+---
 
-(Om ja) Beskrivning av art, intelligensnivå, och riskklass 
+## 🧪 Setup & Instruktioner
 
-isPlasmaActive 
+- Lokalt uppstart: se `README.md`
+- Användning av API
+- Rollbaserad åtkomst
 
-Boolean 
+---
 
-Indikerar om varan innehåller plasma-aktiva material 
+## ⭐ Bonusutmaningar
 
-plasmaStabilityLevel 
+- Realtidsuppdatering via WebSockets
+- Visuell rymdkarta med destinationer
+- “Försäkra” leverans (extra avgift & spårning)
+- Statistik till admin (ex. mest trafikerade planeter)
+- Chatbot – ex. “Vart är mitt paket?”
 
-Number (1–10) 
+---
 
-(Om ja) Skala över stabiliteten i materialet 
+## ✅ Bedömningskriterier
 
-originPlanetLawsConfirmed 
-
-Checkbox 
-
-Användaren intygar att exporten följer ursprungsplanetens lagar 
-
-quarantineRequired 
-
-Boolean 
-
-Behövs särskild karantänzon vid ankomst? 
-
-customsNotes 
-
-Textarea 
-
-Frivillig fritext för tullinspektörer 
-
-submittedBy 
-
-Auto 
-
-Namn/ID på inloggad användare (kopplas automatiskt) 
-
- 
-
-🛡️ Valideringsregler (Frontend & Backend) 
-
-containsLifeforms === true ⇒ lifeformType måste fyllas i (obligatoriskt) 
-
-isPlasmaActive === true ⇒ plasmaStabilityLevel måste anges (1–10) 
-
-Om plasmaStabilityLevel < 4 ⇒ frakten måste markeras som karantänsklassad 
-
-originPlanetLawsConfirmed måste vara ikryssad, annars får formuläret inte skickas 
-
-Textfält har begränsningar i antal tecken för att motverka injection eller dataexplosion 
-
- 
-
-💥 Automatiserad Riskbedömning 
-
-Beskrivning: 
- Bygg en funktion (frontend eller backend) som automatiskt klassificerar fraktrisknivå baserat på formulärets innehåll och returnerar en flaggning som visas för admin. 
-
-Riskklassificeringsexempel: 
-
-Villkor 
-
-Risknivå 
-
-Plasmaaktiv + stabilitet < 5 + innehåller livsform 
-
-Kritisk 
-
-Livsform + okänd art (saknar typ eller “?” i beskrivningen) 
-
-Hög 
-
-Plasmaaktiv med stabilitet mellan 5–7 
-
-Medel 
-
-Inga specialegenskaper 
-
-Låg 
-
- 
-
- 
-
-🔧 Backend 
-
-Autentisering (JWT eller liknande) 
-
-REST API eller GraphQL med tydliga endpoints för: 
-
-Fraktbokning 
-
-Fraktstatus 
-
-Användarroller och autentisering 
-
-Tullformulär 
-
-Fraktdata innehåller: 
-
-Unik ID, avsändarplanet, destinationsplanet, vikt, typ (livsmedel, teknik, varelser), risknivå, status 
-
-Simulera fraktstatus över tid (t.ex. cron-jobb eller endpoint som uppdaterar status efter x minuter) 
- 
-
-🗄️ Databasförslag 
-
-PostgreSQL eller MongoDB 
-
-Tre huvudsakliga modeller: User, Shipment, TollForm 
-
- 
-
-⚙️ Infrastruktur / DevOps 
-
-Dockerisera hela applikationen (frontend, backend, databas) 
-
-docker-compose.yml för enkel uppstart 
-
-CI/CD (GitHub Actions) som: 
-
-Lintar kod 
-
-Kör tester (minst enhetstester på backend) 
-
-Bygger och deployar projektet till molntjänst (Railway, Vercel, etc.) 
-
-README med instruktioner för: 
-
-Setup lokalt 
-
-Användning av API 
-
-Rollbaserad åtkomst 
-
- 
-
-⭐ Bonusutmaningar 
-
-Realtidsuppdatering med WebSockets (för fraktstatus) 
-
-Visuell rymdkarta med destinationer 
-
-Möjlighet att “försäkra” en leverans (extra avgift & tracking) 
-
-Lägg till statistik / diagram till Admin-dashboard (t.ex. antal transporter per planet, mest använda rutter) 
-
-Chat-bot (kundsupport, kan exempelvis fråga “Vart är mitt paket?”) 
-
- 
-
-🧪 Bedömningskriterier 
-
-Funktionalitet & kravuppfyllnad 
-
-Responsivitet 
-
-Arkitektur & kodkvalitet 
-
-UI/UX och användarvänlighet 
-
-DevOps & struktur 
-
-Dokumentation och onboarding 
+- Funktionalitet & kravuppfyllnad
+- Responsiv design
+- Arkitektur & kodkvalitet
+- UX/UI
+- DevOps & struktur
+- Dokumentation & onboarding
+```
