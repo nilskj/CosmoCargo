@@ -1,12 +1,99 @@
-
-```markdown
-# 🚀 Kodtest: CosmoCargo™ – Intergalaktisk Fraktcentral
+# 🚀 CosmoCargo™ – Intergalaktisk Fraktcentral
 
 ## 🪐 Bakgrund
 
-**CosmoCargo™** är den ledande aktören inom rymdlogistik, med leveranser till över 9000 rymdstationer. Ett sofistikerat bokningssystem används av **kunder**, **piloter** och **administratörer**. Du har blivit anlitad för att bygga en ny feature med fokus på användarvänlighet, tydlig struktur och god kodkvalitet.
+**CosmoCargo™** är den ledande aktören inom rymdlogistik, med leveranser till över 9000 rymdstationer. Ett sofistikerat bokningssystem används av **kunder**, **piloter** och **administratörer**.
 
----
+## 🛠️ Teknisk Stack
+
+### Frontend
+- React
+- TypeScript
+- Next.js
+- Tanstack Query
+- Tailwind CSS
+- Mocha (för testning)
+
+### Backend
+- .NET
+- Minimal API
+- REST
+- Entity Framework Core
+- PostgreSQL
+
+### Infrastruktur
+- Docker Compose
+- Infrastructure as Code (IaC)
+
+## 🚀 Kom igång
+
+### Förutsättningar
+- Docker och Docker Compose
+- Node.js (v18+)
+- .NET SDK 8.0+
+
+### Installation
+
+1. Klona repositoryt:
+```bash
+git clone https://github.com/ditt-användarnamn/cosmocargo.git
+cd cosmocargo
+```
+
+2. Starta hela applikationen med Docker Compose:
+```bash
+docker-compose up -d
+```
+
+3. Applikationen är nu tillgänglig på:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:5000
+
+## 📄 Funktionalitet
+
+Se den fullständiga specifikationen för detaljer om systemets funktionalitet, inklusive:
+- Inloggning för kunder, piloter och administratörer
+- Fraktbokning och spårning
+- Tullformulär och riskbedömning
+- Administrativ hantering
+
+## 🧪 Utveckling
+
+### Köra frontend separat
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### Köra backend separat
+```bash
+cd backend
+dotnet restore
+dotnet run
+```
+
+### Köra tester
+```bash
+# Frontend tester
+cd frontend
+npm test
+
+# Backend tester
+cd backend
+dotnet test
+```
+
+## 📁 Projektstruktur
+
+```
+cosmocargo/
+├── frontend/           # Next.js React-applikation
+├── backend/            # .NET Minimal API
+├── infrastructure/     # IaC-filer
+├── docker-compose.yml  # Docker Compose-konfiguration
+└── README.md           # Projektdokumentation
+```
 
 ## 🛠️ Funktionella krav
 
@@ -27,7 +114,7 @@
 #### 🧑‍💼 Admin Dashboard
 - Se alla frakter med filterfunktionalitet
 - Tilldela pilot till frakt
-- Ändra status till “Lost in Black Hole”
+- Ändra status till "Lost in Black Hole"
 
 ---
 
@@ -135,9 +222,9 @@ Bygg en funktion som klassificerar risknivå baserat på tullformulär.
 
 - Realtidsuppdatering via WebSockets
 - Visuell rymdkarta med destinationer
-- “Försäkra” leverans (extra avgift & spårning)
+- "Försäkra" leverans (extra avgift & spårning)
 - Statistik till admin (ex. mest trafikerade planeter)
-- Chatbot – ex. “Vart är mitt paket?”
+- Chatbot – ex. "Vart är mitt paket?"
 
 ---
 
@@ -149,4 +236,3 @@ Bygg en funktion som klassificerar risknivå baserat på tullformulär.
 - UX/UI
 - DevOps & struktur
 - Dokumentation & onboarding
-```
