@@ -66,13 +66,26 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Seed-data
+// Migrera databas och seeda data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
-    DbInitializer.Initialize(context);
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        context.Database.Migrate(); // Använd migrationer istället för EnsureCreated
+        
+        // Seeda data om databasen är tom
+        if (!context.Users.Any())
+        {
+            DbInitializer.Initialize(context);
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ett fel uppstod vid migrering av databasen.");
+    }
 }
 
 // API-endpoints
