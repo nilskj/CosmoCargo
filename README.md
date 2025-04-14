@@ -2,7 +2,7 @@
 
 ## 🪐 Bakgrund
 
-**CosmoCargo™** är den ledande aktören inom rymdlogistik, med leveranser till över 9000 rymdstationer. Ett sofistikerat bokningssystem används av **kunder**, **piloter** och **administratörer**.
+**CosmoCargo™** är den ledande aktören inom rymdlogistik, med leveranser till över 9000 rymdstationer och kolonier i hela galaxen, från de innersta månarna vid Jupiter till de yttre handelszonerna i Andromedatriangeln. Tusentals transporter koordineras dagligen genom ett sofistikerat bokningssystem som används av kunder, piloter och administratörer. Allt måste gå snabbt, säkert och smidigt i det intergalaktiska kaoset.
 
 ## 🛠️ Teknisk Stack
 
@@ -49,14 +49,6 @@ docker-compose up -d
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5000
 
-## 📄 Funktionalitet
-
-Se den fullständiga specifikationen för detaljer om systemets funktionalitet, inklusive:
-- Inloggning för kunder, piloter och administratörer
-- Fraktbokning och spårning
-- Tullformulär och riskbedömning
-- Administrativ hantering
-
 ## 🧪 Utveckling
 
 ### Köra frontend separat
@@ -95,41 +87,37 @@ cosmocargo/
 └── README.md           # Projektdokumentation
 ```
 
-## 🛠️ Funktionella krav
-
-### 🎨 Frontend
+## 📄 Befintlig funktionalitet
 
 #### 🔐 Inloggning & Roller
 - Inloggning/registrering för tre roller: **Kund**, **Pilot**, **Admin**
 
 #### 👩‍🚀 Kundvy
-- Skapa en frakt via formulär (avsändare, mottagare, vikt, kategori, prioritet)
-- Se pågående och tidigare leveranser
-- Spåra paket i realtid (simulerad status)
+- En kund kan skapa en frakt via formulär (avsändare, mottagare, vikt, kategori, prioritet)
+- En kund kan se pågående och tidigare leveranser
+- En kund kan spåra paket i realtid (simulerad status)
 
 #### 🚀 Pilotvy
-- Se tilldelade frakter (status, datum, destination)
-- Uppdatera status: *påbörjad*, *pågående*, *levererad*
+- En pilot kan se tilldelade frakter (status, datum, destination)
+- En pilot kan uppdatera leveransens status till: *ongoing*, *delivered*
 
 #### 🧑‍💼 Admin Dashboard
-- Se alla frakter med filterfunktionalitet
-- Tilldela pilot till frakt
-- Ändra status till "Lost in Black Hole"
+- En admin kan se alla frakter och filtera på olika parametrar.
+- En admin kan tilldela en pilot till en frakt
+- En admin kan ändra fraktstatus till *delayed*, *lost in black hole*
 
 ---
 
-## 📄 Tullformulär: "Galactic Cargo Declaration"
+## 📄 Uppgift 1: Galactic Cargo Declaration™ (Frontend)
 
-Universum inför intergalaktiska tullar – ett nytt system krävs.
+Universum står inför ett handelskrig och intergalaktiska tullar kommer införas. CosmoCargo har anlitat dig för att ta fram ett system för tullhantering, med fokus på användarvänlighet, tydlig struktur och god kodkvalitet.
 
 ### Funktionalitet
 - **Kund**: Skickar in tullformulär vid bokning
 - **Admin**: Granskar formuläret
 - **Pilot**: Ser om frakten är högriskklassad
 
----
-
-## 🧩 Formulärfält
+### Formulärfält
 
 | Fält | Typ | Beskrivning |
 |------|-----|-------------|
@@ -143,9 +131,7 @@ Universum inför intergalaktiska tullar – ett nytt system krävs.
 | `customsNotes` | Textarea | Frivillig kommentar |
 | `submittedBy` | Auto | Användare kopplas automatiskt |
 
----
-
-## 🛡️ Valideringsregler
+### Valideringsregler
 
 - `containsLifeforms === true` ⇒ `lifeformType` är obligatoriskt
 - `isPlasmaActive === true` ⇒ `plasmaStabilityLevel` måste anges (1–10)
@@ -153,9 +139,7 @@ Universum inför intergalaktiska tullar – ett nytt system krävs.
 - `originPlanetLawsConfirmed` måste vara ikryssad
 - Textfält har begränsningar (säkerhet)
 
----
-
-## 💥 Automatiserad Riskbedömning
+### Automatiserad Riskbedömning
 
 Bygg en funktion som klassificerar risknivå baserat på tullformulär.
 
@@ -170,61 +154,47 @@ Bygg en funktion som klassificerar risknivå baserat på tullformulär.
 
 ---
 
-## 🔧 Backend
+## 📄 Uppgift 2: Intergalactic Chaos Engine™ (Backend/Fullstack)
+
+I rymden kan allt gå fel. Ta rollen som Master of the Universe och bygg en Intergalactic Chaos Engine som slupmässigt genererar olika händelser som påverkar frakterna.
 
 ### Funktionalitet
-- Autentisering via JWT eller liknande
-- REST API eller GraphQL för:
-  - Fraktbokning
-  - Fraktstatus
-  - Roller & auth
-  - Tullformulär
+- Var X:e minut muteras en slumpmässig frakt baserat på en kaoshändelse
+- Ta hänsyn till sannorlikheter
+- Visa dessa i ett “Galactic Event Feed” på admin-panelen med tidsstämpel och påverkan (frontend), alternativt endast i logg (backend)
 
-### Fraktdata innehåller
-- ID, avsändare, destination, vikt, typ, risknivå, status
+### Förslag på händelser
 
-### Statusuppdatering
-- Simulerad statusförändring över tid (t.ex. cron-jobb)
+| Händelse | Effekt på frakt |
+|---------|----------|
+| Meteorstorm | Försening |
+| Maskhål | Destination omdirigeras |
+| Piratattack | Vikt ändras till 0 |
+| Virus i biosensor | Livsformflagga ändras till “Instabil” |
+| Svart hål nära rutten | Status ändras till “Försvunnen i svart hål”  |
+| AI gör uppror | Pilot och destination ändras till "Okänd"  |
 
----
+### Sannorlikhet
 
-## 🗄️ Databas
+- Vissa frakttyper (ex. plasmaaktiva med instabilitet < 5) har större sannolikhet att drabbas 
+- Algoritmen ska ta hänsyn till risknivå. 
 
-**Förslag:** PostgreSQL eller MongoDB
+## 📄 Uppgift 3: Intergalactic AI Support™ (Fullstack)
 
-### Modeller
-- `User`
-- `Shipment`
-- `TollForm`
+CosmoCargo vill kunna erbjudea sina kunder en tillgänglig och engegerande kanal för att snabbt få hjälp med supportärenden och guida användaren genom systemet. Du är anlitad för att implementera en chatbot som ska svara på kundernas vanligaste frågor.
 
----
+### Funktionalitet
+- Svara på frågor baserat på kundens fraktdata
+- Svara på frågor om formulär eller regler
 
-## ⚙️ Infrastruktur & DevOps
+### Förslag på smart konversation
 
-- Dockerisera hela stacken (frontend, backend, databas)
-- Använd `docker-compose.yml` för enkel uppstart
-- CI/CD med GitHub Actions:
-  - Linting
-  - Tester (minst enhetstester på backend)
-  - Bygg & deploy till moln (Railway, Vercel etc.)
-
----
-
-## 🧪 Setup & Instruktioner
-
-- Lokalt uppstart: se `README.md`
-- Användning av API
-- Rollbaserad åtkomst
-
----
-
-## ⭐ Bonusutmaningar
-
-- Realtidsuppdatering via WebSockets
-- Visuell rymdkarta med destinationer
-- "Försäkra" leverans (extra avgift & spårning)
-- Statistik till admin (ex. mest trafikerade planeter)
-- Chatbot – ex. "Vart är mitt paket?"
+| Fråga från användare | Svar från bot |
+|---------|----------|
+| "Vart är mitt paket?" | "Din frakt med ID SHIP-992 befinner sig vid Mars"  |
+| "Hur fyller jag i tullformuläret?"  | "Jag kan guida dig! Har frakten plasmaaktivt innehåll?"  |
+| "Vad betyder 'försvunnen i svart hål'?"  | "Det paketet kommer aldrig komma fram" |
+| "Vad är risknivå 5?"  | "Ditt paket har ett faligt innehåll och det är hög risk för att något kommer gå fel" |
 
 ---
 
