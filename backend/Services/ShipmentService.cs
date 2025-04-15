@@ -54,7 +54,7 @@ namespace CosmoCargo.Services
             shipment.CreatedAt = DateTime.UtcNow;
             shipment.UpdatedAt = DateTime.UtcNow;
             shipment.Status = ShipmentStatus.Pending;
-            shipment.RiskLevel = RiskLevel.Low; // Standard risknivå, uppdateras när tullformulär skapas
+            shipment.RiskLevel = RiskLevel.Low;
 
             _context.Shipments.Add(shipment);
             await _context.SaveChangesAsync();

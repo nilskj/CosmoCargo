@@ -25,23 +25,19 @@ namespace CosmoCargo.Endpoints
                 return Results.NotFound();
             }
 
-            // Kontrollera behörighet
             var role = user.FindFirst(ClaimTypes.Role)?.Value;
             var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
 
             if (role == UserRole.Admin.ToString())
             {
-                // Admin kan se alla tullformulär
                 return Results.Ok(tollForm);
             }
             else if (role == UserRole.Pilot.ToString() && tollForm.Shipment.PilotId == userId)
             {
-                // Pilot kan se tullformulär för sina tilldelade frakter
                 return Results.Ok(tollForm);
             }
             else if (role == UserRole.Customer.ToString() && tollForm.SubmittedById == userId)
             {
-                // Kund kan se sina egna tullformulär
                 return Results.Ok(tollForm);
             }
 
@@ -56,7 +52,6 @@ namespace CosmoCargo.Endpoints
         {
             var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
 
-            // Kontrollera att frakten existerar och tillhör användaren
             var shipment = await shipmentService.GetShipmentByIdAsync(request.ShipmentId);
             if (shipment == null)
             {
@@ -68,7 +63,6 @@ namespace CosmoCargo.Endpoints
                 return Results.Forbid();
             }
 
-            // Kontrollera om det redan finns ett tullformulär för denna frakt
             var existingTollForm = await tollFormService.GetTollFormByShipmentIdAsync(request.ShipmentId);
             if (existingTollForm != null)
             {

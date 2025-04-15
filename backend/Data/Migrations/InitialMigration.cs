@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CosmoCargo.Data.Migrations
 {
-    /// <inheritdoc />
     public partial class InitialMigration : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -61,43 +59,6 @@ namespace CosmoCargo.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "TollForms",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ShipmentId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ContainsLifeforms = table.Column<bool>(type: "boolean", nullable: false),
-                    LifeformType = table.Column<string>(type: "text", nullable: true),
-                    IsPlasmaActive = table.Column<bool>(type: "boolean", nullable: false),
-                    PlasmaStabilityLevel = table.Column<int>(type: "integer", nullable: true),
-                    OriginPlanetLawsConfirmed = table.Column<bool>(type: "boolean", nullable: false),
-                    QuarantineRequired = table.Column<bool>(type: "boolean", nullable: false),
-                    CustomsNotes = table.Column<string>(type: "text", nullable: true),
-                    SubmittedById = table.Column<Guid>(type: "uuid", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsApproved = table.Column<bool>(type: "boolean", nullable: true),
-                    ReviewNotes = table.Column<string>(type: "text", nullable: true),
-                    ReviewedById = table.Column<Guid>(type: "uuid", nullable: true),
-                    ReviewedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TollForms", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TollForms_Shipments_ShipmentId",
-                        column: x => x.ShipmentId,
-                        principalTable: "Shipments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_TollForms_Users_SubmittedById",
-                        column: x => x.SubmittedById,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Shipments_CustomerId",
                 table: "Shipments",
@@ -109,29 +70,14 @@ namespace CosmoCargo.Data.Migrations
                 column: "PilotId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TollForms_ShipmentId",
-                table: "TollForms",
-                column: "ShipmentId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_TollForms_SubmittedById",
-                table: "TollForms",
-                column: "SubmittedById");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
                 unique: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "TollForms");
-
             migrationBuilder.DropTable(
                 name: "Shipments");
 
@@ -139,4 +85,4 @@ namespace CosmoCargo.Data.Migrations
                 name: "Users");
         }
     }
-} 
+}

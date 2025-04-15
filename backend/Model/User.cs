@@ -2,13 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace CosmoCargo.Models
 {
-    public enum UserRole
-    {
-        Customer,
-        Pilot,
-        Admin
-    }
-
     public class User
     {
         public Guid Id { get; set; }
@@ -27,4 +20,4 @@ namespace CosmoCargo.Models
         [JsonIgnore]
         public virtual ICollection<Shipment>? PilotShipments { get; set; }
     }
-} 
+}

@@ -8,13 +8,9 @@ namespace CosmoCargo.Data
     {
         public static void Initialize(AppDbContext context)
         {
-            // Kontrollera om databasen redan är seedat
             if (context.Users.Any())
-            {
-                return; // Databasen har redan data
-            }
+                return;
 
-            // Skapa användare
             var users = new List<User>
             {
                 new User
@@ -49,7 +45,6 @@ namespace CosmoCargo.Data
             context.Users.AddRange(users);
             context.SaveChanges();
 
-            // Skapa frakter
             var shipments = new List<Shipment>
             {
                 new Shipment
@@ -71,6 +66,7 @@ namespace CosmoCargo.Data
                 {
                     Id = Guid.NewGuid(),
                     CustomerId = users.First(u => u.Role == UserRole.Customer).Id,
+                    PilotId = users.First(u => u.Role == UserRole.Pilot).Id,
                     Origin = "Mars",
                     Destination = "Jupiter",
                     Weight = 75.2m,
@@ -86,7 +82,6 @@ namespace CosmoCargo.Data
             context.Shipments.AddRange(shipments);
             context.SaveChanges();
 
-            // Skapa tullformulär
             var tollForms = new List<TollForm>
             {
                 new TollForm

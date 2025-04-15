@@ -15,7 +15,6 @@ namespace CosmoCargo.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Konfigurera relationer
             modelBuilder.Entity<Shipment>()
                 .HasOne(s => s.Customer)
                 .WithMany(u => u.CustomerShipments)
@@ -39,7 +38,6 @@ namespace CosmoCargo.Data
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Konfigurera enum-konvertering
             modelBuilder.Entity<Shipment>()
                 .Property(s => s.Status)
                 .HasConversion<string>();

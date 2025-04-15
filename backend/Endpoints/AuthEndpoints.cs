@@ -34,14 +34,12 @@ namespace CosmoCargo.Endpoints
             RegisterRequest request,
             IUserService userService)
         {
-            // Kontrollera om användaren redan finns
             var existingUser = await userService.GetUserByEmailAsync(request.Email);
             if (existingUser != null)
             {
                 return Results.BadRequest("User with this email already exists");
             }
 
-            // Skapa ny användare
             var user = new User
             {
                 Name = request.Name,
