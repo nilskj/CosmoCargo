@@ -1,6 +1,6 @@
 using CosmoCargo.Models;
 using CosmoCargo.Services;
-using Microsoft.AspNetCore.Http;
+using CosmoCargo.Utils;
 using System.Security.Claims;
 
 namespace CosmoCargo.Endpoints
@@ -11,27 +11,19 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            var role = user.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            var userId = user.GetUserId();
 
             IEnumerable<Shipment> shipments;
 
             if (role == UserRole.Admin.ToString())
-            {
                 shipments = await shipmentService.GetAllShipmentsAsync();
-            }
             else if (role == UserRole.Pilot.ToString())
-            {
                 shipments = await shipmentService.GetShipmentsByPilotIdAsync(userId);
-            }
             else if (role == UserRole.Customer.ToString())
-            {
                 shipments = await shipmentService.GetShipmentsByCustomerIdAsync(userId);
-            }
             else
-            {
                 return Results.Forbid();
-            }
 
             return Results.Ok(shipments);
         }
@@ -43,25 +35,17 @@ namespace CosmoCargo.Endpoints
         {
             var shipment = await shipmentService.GetShipmentByIdAsync(id);
             if (shipment == null)
-            {
                 return Results.NotFound();
-            }
 
-            var role = user.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            var userId = user.GetUserId();
 
             if (role == UserRole.Admin.ToString())
-            {
                 return Results.Ok(shipment);
-            }
             else if (role == UserRole.Pilot.ToString() && shipment.PilotId == userId)
-            {
                 return Results.Ok(shipment);
-            }
             else if (role == UserRole.Customer.ToString() && shipment.CustomerId == userId)
-            {
                 return Results.Ok(shipment);
-            }
 
             return Results.Forbid();
         }
@@ -71,7 +55,11 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            if (role == UserRole.Customer.ToString())
+                return Results.Forbid();
+
+            var userId = user.GetUserId();
 
             var shipment = new Shipment
             {
@@ -93,25 +81,19 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            var role = user.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            var userId = user.GetUserId();
 
             var shipment = await shipmentService.GetShipmentByIdAsync(id);
             if (shipment == null)
-            {
                 return Results.NotFound();
-            }
 
             if (role == UserRole.Pilot.ToString() && shipment.PilotId != userId)
-            {
                 return Results.Forbid();
-            }
 
             var updatedShipment = await shipmentService.UpdateShipmentStatusAsync(id, request.Status);
             if (updatedShipment == null)
-            {
                 return Results.NotFound();
-            }
 
             return Results.Ok(updatedShipment);
         }
@@ -119,13 +101,16 @@ namespace CosmoCargo.Endpoints
         public static async Task<IResult> AssignPilot(
             Guid id,
             AssignPilotRequest request,
-            IShipmentService shipmentService)
+            IShipmentService shipmentService,
+            ClaimsPrincipal user)
         {
+            var role = user.GetRole();
+            if (role != UserRole.Admin.ToString())
+                return Results.Forbid();
+
             var updatedShipment = await shipmentService.AssignPilotAsync(id, request.PilotId);
             if (updatedShipment == null)
-            {
                 return Results.NotFound();
-            }
 
             return Results.Ok(updatedShipment);
         }

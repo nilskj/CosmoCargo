@@ -1,20 +1,5 @@
 namespace CosmoCargo.Models
 {
-    public enum ShipmentStatus
-    {
-        Pending,
-        InProgress,
-        Delivered,
-        LostInBlackHole
-    }
-
-    public enum RiskLevel
-    {
-        Low,
-        Medium,
-        High,
-        Critical
-    }
 
     public class Shipment
     {

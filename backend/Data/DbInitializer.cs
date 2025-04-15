@@ -16,28 +16,55 @@ namespace CosmoCargo.Data
                 new User
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Admin Adminsson",
-                    Email = "admin@cosmocargo.com",
-                    PasswordHash = HashPassword("Admin123!"),
-                    Role = UserRole.Admin,
+                    Name = "Johan Andersson",
+                    Email = "user@example.com",
+                    PasswordHash = Utils.Crypto.HashPassword("mKv2P8dXrL9F"),
+                    Role = UserRole.Customer,
                     CreatedAt = DateTime.UtcNow
                 },
                 new User
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Pilot Pilotsson",
-                    Email = "pilot@cosmocargo.com",
-                    PasswordHash = HashPassword("Pilot123!"),
+                    Name = "Erik Nilsson",
+                    Email = "pilot@example.com",
+                    PasswordHash = Utils.Crypto.HashPassword("zH7yB3tR5wQ9s"),
                     Role = UserRole.Pilot,
                     CreatedAt = DateTime.UtcNow
                 },
                 new User
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Kund Kundsson",
-                    Email = "kund@example.com",
-                    PasswordHash = HashPassword("Kund123!"),
-                    Role = UserRole.Customer,
+                    Name = "Maria Johansson",
+                    Email = "admin@example.com",
+                    PasswordHash = Utils.Crypto.HashPassword("eT4xD6cV2gN8p"),
+                    Role = UserRole.Admin,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Anna Karlsson",
+                    Email = "anna.karlsson@cosmocargo.com",
+                    PasswordHash = Utils.Crypto.HashPassword("pilot123"),
+                    Role = UserRole.Pilot,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Marcus Lindqvist",
+                    Email = "marcus.lindqvist@cosmocargo.com",
+                    PasswordHash = Utils.Crypto.HashPassword("pilot123"),
+                    Role = UserRole.Pilot,
+                    CreatedAt = DateTime.UtcNow
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Elsa Berg",
+                    Email = "elsa.berg@cosmocargo.com",
+                    PasswordHash = Utils.Crypto.HashPassword("pilot123"),
+                    Role = UserRole.Pilot,
                     CreatedAt = DateTime.UtcNow
                 }
             };
@@ -50,13 +77,13 @@ namespace CosmoCargo.Data
                 new Shipment
                 {
                     Id = Guid.NewGuid(),
-                    CustomerId = users.First(u => u.Role == UserRole.Customer).Id,
+                    CustomerId = users.First(u => u.Name == "Johan Andersson").Id,
                     PilotId = users.First(u => u.Role == UserRole.Pilot).Id,
-                    Origin = "Jorden",
-                    Destination = "Mars",
-                    Weight = 150.5m,
-                    Category = "Elektronik",
-                    Priority = "Hög",
+                    Origin = "Stockholm, Sweden",
+                    Destination = "Lunar Colony Alpha",
+                    Weight = 100,
+                    Category = "Scientific Equipment",
+                    Priority = "Normal",
                     Status = ShipmentStatus.Pending,
                     RiskLevel = RiskLevel.Low,
                     CreatedAt = DateTime.UtcNow,
@@ -65,29 +92,82 @@ namespace CosmoCargo.Data
                 new Shipment
                 {
                     Id = Guid.NewGuid(),
-                    CustomerId = users.First(u => u.Role == UserRole.Customer).Id,
+                    CustomerId = users.First(u => u.Name == "Maria Johansson").Id,
                     PilotId = users.First(u => u.Role == UserRole.Pilot).Id,
-                    Origin = "Mars",
-                    Destination = "Jupiter",
-                    Weight = 75.2m,
-                    Category = "Livsmedel",
+                    Origin = "Gothenburg, Sweden",
+                    Destination = "Mars Base One",
+                    Weight = 75,
+                    Category = "Medical Supplies",
+                    Priority = "High",
+                    Status = ShipmentStatus.InProgress,
+                    RiskLevel = RiskLevel.Low,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                },
+                new Shipment
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = users.First(u => u.Name == "Erik Nilsson").Id,
+                    PilotId = users.First(u => u.Role == UserRole.Pilot).Id,
+                    Origin = "Malmö, Sweden",
+                    Destination = "Titan Research Station",
+                    Weight = 200,
+                    Category = "Construction Materials",
                     Priority = "Normal",
                     Status = ShipmentStatus.Pending,
                     RiskLevel = RiskLevel.Low,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
+                },
+                new Shipment
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = users.First(u => u.Name == "Johan Andersson").Id,
+                    PilotId = users.First(u => u.Name == "Anna Karlsson").Id,
+                    Origin = "Jorden, Alpha Station",
+                    Destination = "Mars, Olympus Station",
+                    Weight = 150,
+                    Category = "General Cargo",
+                    Priority = "Normal",
+                    Status = ShipmentStatus.InProgress,
+                    RiskLevel = RiskLevel.Low,
+                    CreatedAt = DateTime.Parse("2023-04-10"),
+                    UpdatedAt = DateTime.Parse("2023-04-10")
+                },
+                new Shipment
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = users.First(u => u.Name == "Maria Johansson").Id,
+                    PilotId = users.First(u => u.Name == "Marcus Lindqvist").Id,
+                    Origin = "Jorden, Beta Station",
+                    Destination = "Europa, Ice Harbor",
+                    Weight = 120,
+                    Category = "General Cargo",
+                    Priority = "Normal",
+                    Status = ShipmentStatus.Pending,
+                    RiskLevel = RiskLevel.Low,
+                    CreatedAt = DateTime.Parse("2023-04-12"),
+                    UpdatedAt = DateTime.Parse("2023-04-12")
+                },
+                new Shipment
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerId = users.First(u => u.Name == "Erik Nilsson").Id,
+                    PilotId = users.First(u => u.Name == "Elsa Berg").Id,
+                    Origin = "Mars, Olympus Station",
+                    Destination = "Jorden, Gamma Station",
+                    Weight = 180,
+                    Category = "General Cargo",
+                    Priority = "Normal",
+                    Status = ShipmentStatus.InProgress,
+                    RiskLevel = RiskLevel.Low,
+                    CreatedAt = DateTime.Parse("2023-04-08"),
+                    UpdatedAt = DateTime.Parse("2023-04-08")
                 }
             };
 
             context.Shipments.AddRange(shipments);
             context.SaveChanges();
         }
-
-        private static string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
-        }
     }
-} 
+}

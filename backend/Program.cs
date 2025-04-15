@@ -43,6 +43,7 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
+builder.Services.AddScoped<IPilotService, PilotService>();
 
 var app = builder.Build();
 
@@ -57,6 +58,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Initialize database with seed data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -69,17 +71,18 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ett fel uppstod vid migrering av databasen.");
+        logger.LogError(ex, "Ett fel uppstod vid initialisering av databasen.");
     }
 }
 
-app.MapGet("/", () => "CosmoCargo API är igång!").AllowAnonymous();
 app.MapPost("/api/auth/login", AuthEndpoints.Login);
-app.MapPost("/api/auth/register", AuthEndpoints.Register);
 app.MapGet("/api/shipments", ShipmentEndpoints.GetAllShipments).RequireAuthorization();
 app.MapGet("/api/shipments/{id}", ShipmentEndpoints.GetShipmentById).RequireAuthorization();
 app.MapPost("/api/shipments", ShipmentEndpoints.CreateShipment).RequireAuthorization(policy => policy.RequireRole("Customer"));
 app.MapPut("/api/shipments/{id}/status", ShipmentEndpoints.UpdateShipmentStatus).RequireAuthorization(policy => policy.RequireRole("Pilot", "Admin"));
 app.MapPut("/api/shipments/{id}/assign", ShipmentEndpoints.AssignPilot).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGet("/api/pilots", PilotEndpoints.GetAllPilots).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGet("/api/pilots/{id}", PilotEndpoints.GetPilotById).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGet("/api/pilots/{id}/availability", PilotEndpoints.GetPilotAvailability).RequireAuthorization(policy => policy.RequireRole("Admin"));
 
 app.Run();
