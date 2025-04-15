@@ -1,8 +1,6 @@
 using CosmoCargo.Data;
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace CosmoCargo.Services
 {
@@ -34,34 +32,9 @@ namespace CosmoCargo.Services
             return VerifyPassword(password, user.PasswordHash);
         }
 
-        public async Task<User> CreateUserAsync(User user, string password)
-        {
-            user.PasswordHash = HashPassword(password);
-            user.CreatedAt = DateTime.UtcNow;
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return user;
-        }
-
-        public async Task<IEnumerable<User>> GetPilotsAsync()
-        {
-            return await _context.Users
-                .Where(u => u.Role == UserRole.Pilot)
-                .ToListAsync();
-        }
-
-        private string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
-        }
-
         private bool VerifyPassword(string password, string hash)
         {
-            return HashPassword(password) == hash;
+            return Utils.Crypto.HashPassword(password) == hash;
         }
     }
-} 
+}

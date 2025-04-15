@@ -1,19 +1,51 @@
 using CosmoCargo.Data;
-using CosmoCargo.Models;
 using CosmoCargo.Services;
 using CosmoCargo.Endpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Lägg till tjänster i containern
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "CosmoCargo API",
+        Version = "v1",
+        Description = "API for managing space cargo shipments"
+    });
 
-// Konfigurera CORS
+    // Add JWT Authentication support in Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -24,11 +56,9 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Konfigurera databas
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Konfigurera autentisering
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -46,19 +76,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Registrera tjänster
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
-builder.Services.AddScoped<ITollFormService, TollFormService>();
-builder.Services.AddScoped<IRiskAssessmentService, RiskAssessmentService>();
+builder.Services.AddScoped<IPilotService, PilotService>();
 
 var app = builder.Build();
 
-// Konfigurera HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
@@ -66,55 +93,30 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Migrera databas och seeda data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        context.Database.Migrate(); // Använd migrationer istället för EnsureCreated
-        
-        // Seeda data om databasen är tom
-        if (!context.Users.Any())
-        {
-            DbInitializer.Initialize(context);
-        }
+        context.Database.Migrate();
+        DbInitializer.Initialize(context);
     }
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Ett fel uppstod vid migrering av databasen.");
+        logger.LogError(ex, "Ett fel uppstod vid initialisering av databasen.");
     }
 }
 
-// API-endpoints
-app.MapGet("/", () => "CosmoCargo API är igång!").AllowAnonymous();
-
-// Auth endpoints
 app.MapPost("/api/auth/login", AuthEndpoints.Login);
-app.MapPost("/api/auth/register", AuthEndpoints.Register);
+app.MapGet("/api/shipments", ShipmentEndpoints.GetAllShipments).RequireAuthorization();
+app.MapGet("/api/shipments/{id}", ShipmentEndpoints.GetShipmentById).RequireAuthorization();
+app.MapPost("/api/shipments", ShipmentEndpoints.CreateShipment).RequireAuthorization(policy => policy.RequireRole("Customer"));
+app.MapPut("/api/shipments/{id}/status", ShipmentEndpoints.UpdateShipmentStatus).RequireAuthorization(policy => policy.RequireRole("Pilot", "Admin"));
+app.MapPut("/api/shipments/{id}/assign", ShipmentEndpoints.AssignPilot).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGet("/api/pilots", PilotEndpoints.GetAllPilots).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGet("/api/pilots/{id}", PilotEndpoints.GetPilotById).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.MapGet("/api/pilots/{id}/availability", PilotEndpoints.GetPilotAvailability).RequireAuthorization(policy => policy.RequireRole("Admin"));
 
-// Shipment endpoints
-app.MapGet("/api/shipments", ShipmentEndpoints.GetAllShipments)
-   .RequireAuthorization();
-app.MapGet("/api/shipments/{id}", ShipmentEndpoints.GetShipmentById)
-   .RequireAuthorization();
-app.MapPost("/api/shipments", ShipmentEndpoints.CreateShipment)
-   .RequireAuthorization(policy => policy.RequireRole("Customer"));
-app.MapPut("/api/shipments/{id}/status", ShipmentEndpoints.UpdateShipmentStatus)
-   .RequireAuthorization(policy => policy.RequireRole("Pilot", "Admin"));
-app.MapPut("/api/shipments/{id}/assign", ShipmentEndpoints.AssignPilot)
-   .RequireAuthorization(policy => policy.RequireRole("Admin"));
-
-// TollForm endpoints
-app.MapGet("/api/tollforms", TollFormEndpoints.GetAllTollForms)
-   .RequireAuthorization(policy => policy.RequireRole("Admin"));
-app.MapGet("/api/tollforms/{id}", TollFormEndpoints.GetTollFormById)
-   .RequireAuthorization();
-app.MapPost("/api/tollforms", TollFormEndpoints.CreateTollForm)
-   .RequireAuthorization(policy => policy.RequireRole("Customer"));
-app.MapPut("/api/tollforms/{id}/review", TollFormEndpoints.ReviewTollForm)
-   .RequireAuthorization(policy => policy.RequireRole("Admin"));
-
-app.Run(); 
+app.Run();

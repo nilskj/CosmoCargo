@@ -1,5 +1,5 @@
 using CosmoCargo.Data;
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Services
@@ -7,12 +7,10 @@ namespace CosmoCargo.Services
     public class ShipmentService : IShipmentService
     {
         private readonly AppDbContext _context;
-        private readonly IRiskAssessmentService _riskAssessmentService;
 
-        public ShipmentService(AppDbContext context, IRiskAssessmentService riskAssessmentService)
+        public ShipmentService(AppDbContext context)
         {
             _context = context;
-            _riskAssessmentService = riskAssessmentService;
         }
 
         public async Task<IEnumerable<Shipment>> GetAllShipmentsAsync()
@@ -44,7 +42,6 @@ namespace CosmoCargo.Services
             return await _context.Shipments
                 .Include(s => s.Customer)
                 .Include(s => s.Pilot)
-                .Include(s => s.TollForm)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
@@ -54,7 +51,7 @@ namespace CosmoCargo.Services
             shipment.CreatedAt = DateTime.UtcNow;
             shipment.UpdatedAt = DateTime.UtcNow;
             shipment.Status = ShipmentStatus.Pending;
-            shipment.RiskLevel = RiskLevel.Low; // Standard risknivå, uppdateras när tullformulär skapas
+            shipment.RiskLevel = RiskLevel.Low;
 
             _context.Shipments.Add(shipment);
             await _context.SaveChangesAsync();
@@ -92,4 +89,4 @@ namespace CosmoCargo.Services
             return shipment;
         }
     }
-} 
+}
