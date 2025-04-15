@@ -131,8 +131,8 @@ namespace CosmoCargo.Data
                     Priority = "Normal",
                     Status = ShipmentStatus.InProgress,
                     RiskLevel = RiskLevel.Low,
-                    CreatedAt = DateTime.Parse("2023-04-10"),
-                    UpdatedAt = DateTime.Parse("2023-04-10")
+                    CreatedAt = DateTime.Parse("2023-04-10").ToUniversalTime(),
+                    UpdatedAt = DateTime.Parse("2023-04-10").ToUniversalTime()
                 },
                 new Shipment
                 {
@@ -146,8 +146,8 @@ namespace CosmoCargo.Data
                     Priority = "Normal",
                     Status = ShipmentStatus.Pending,
                     RiskLevel = RiskLevel.Low,
-                    CreatedAt = DateTime.Parse("2023-04-12"),
-                    UpdatedAt = DateTime.Parse("2023-04-12")
+                    CreatedAt = DateTime.Parse("2023-04-12").ToUniversalTime(),
+                    UpdatedAt = DateTime.Parse("2023-04-12").ToUniversalTime()
                 },
                 new Shipment
                 {
@@ -161,8 +161,8 @@ namespace CosmoCargo.Data
                     Priority = "Normal",
                     Status = ShipmentStatus.InProgress,
                     RiskLevel = RiskLevel.Low,
-                    CreatedAt = DateTime.Parse("2023-04-08"),
-                    UpdatedAt = DateTime.Parse("2023-04-08")
+                    CreatedAt = DateTime.Parse("2023-04-08").ToUniversalTime(),
+                    UpdatedAt = DateTime.Parse("2023-04-08").ToUniversalTime()
                 }
             };
 

@@ -7,31 +7,37 @@
 - Docker och Docker Compose
 - PostgreSQL-klient (valfritt)
 
-### Starta databasen
+### Starta applikationen
+Det finns två sätt att köra applikationen:
+
+1. **Kör allt i Docker (rekommenderas)**
 ```bash
+# Från rotkatalogen
+docker-compose up -d
+```
+
+2. **Kör backend lokalt och databas i Docker**
+```bash
+# Starta databasen
 docker-compose up db -d
+
+# Uppdatera appsettings.json med rätt anslutningssträng:
+# "DefaultConnection": "Host=localhost;Port=5432;Database=cosmocargo;Username=postgres;Password=postgres"
+
+# Starta backend
+dotnet run
 ```
 
-### Köra migrationer
-```bash
-# Från backend-katalogen
-chmod +x db-migrate.sh
-./db-migrate.sh
-```
-
-### Skapa en ny migration
-```bash
-./db-migrate.sh add NamnPåMigration
-```
-
-### Ta bort senaste migrationen
-```bash
-./db-migrate.sh remove
-```
+### Databasautomatisering
+Databasen hanteras automatiskt av Entity Framework Core. Vid första start:
+1. Skapas databasen om den inte finns
+2. Körs alla migrationer
+3. Seedas testdata
 
 ### Ansluta till databasen
 PostgreSQL-databasen är tillgänglig på:
-- Host: localhost
+- Host: localhost (när du kör utanför Docker)
+- Host: db (när du kör inom Docker-nätverket)
 - Port: 5432
 - Databas: cosmocargo
 - Användare: postgres
@@ -55,13 +61,28 @@ För att ansluta till databasen i pgAdmin:
 
 ## API-dokumentation
 
-API-dokumentation är tillgänglig via Swagger på http://localhost:5000/swagger när applikationen körs.
+API-dokumentation är tillgänglig på två sätt:
+
+1. **Scalar API Reference** (Rekommenderas)
+   - Tillgänglig på http://localhost:5000/api-reference
+   - Modern och användarvänlig gränssnitt
+   - Stöd för JWT-autentisering
+
+2. **Swagger UI**
+   - Tillgänglig på http://localhost:5000/api-docs
+   - Mer teknisk dokumentation
+   - Användbar för utvecklare
 
 ## Testdata
 
 Systemet seedar automatiskt databasen med testdata vid första start:
 
 ### Användare
-- Admin: admin@cosmocargo.com / Admin123!
-- Pilot: pilot@cosmocargo.com / Pilot123!
-- Kund: kund@example.com / Kund123! 
+- Admin: admin@example.com / eT4xD6cV2gN8p
+- Pilot: pilot@example.com / zH7yB3tR5wQ9s
+- Kund: user@example.com / mKv2P8dXrL9F
+
+### Piloter
+- Anna Karlsson: anna.karlsson@cosmocargo.com / pilot123
+- Marcus Lindqvist: marcus.lindqvist@cosmocargo.com / pilot123
+- Elsa Berg: elsa.berg@cosmocargo.com / pilot123 
