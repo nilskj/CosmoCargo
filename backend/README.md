@@ -18,11 +18,8 @@ docker-compose up -d
 
 2. **Kör backend lokalt och databas i Docker**
 ```bash
-# Starta databasen
+# Starta databasen (från rotkatalogen)
 docker-compose up db -d
-
-# Uppdatera appsettings.json med rätt anslutningssträng:
-# "DefaultConnection": "Host=localhost;Port=5432;Database=cosmocargo;Username=postgres;Password=postgres"
 
 # Starta backend
 dotnet run
@@ -61,17 +58,12 @@ För att ansluta till databasen i pgAdmin:
 
 ## API-dokumentation
 
-API-dokumentation är tillgänglig på två sätt:
+API-dokumentation är tillgänglig:
 
-1. **Scalar API Reference** (Rekommenderas)
-   - Tillgänglig på http://localhost:5000/api-reference
+**Scalar API Reference**
+   - Tillgänglig på http://localhost:5000/scalar
    - Modern och användarvänlig gränssnitt
    - Stöd för JWT-autentisering
-
-2. **Swagger UI**
-   - Tillgänglig på http://localhost:5000/api-docs
-   - Mer teknisk dokumentation
-   - Användbar för utvecklare
 
 ## Testdata
 
@@ -85,4 +77,5 @@ Systemet seedar automatiskt databasen med testdata vid första start:
 ### Piloter
 - Anna Karlsson: anna.karlsson@cosmocargo.com / pilot123
 - Marcus Lindqvist: marcus.lindqvist@cosmocargo.com / pilot123
-- Elsa Berg: elsa.berg@cosmocargo.com / pilot123 
+- Elsa Berg: elsa.berg@cosmocargo.com / pilot123
+
