@@ -7,12 +7,10 @@ namespace CosmoCargo.Services
     public class ShipmentService : IShipmentService
     {
         private readonly AppDbContext _context;
-        private readonly IRiskAssessmentService _riskAssessmentService;
 
-        public ShipmentService(AppDbContext context, IRiskAssessmentService riskAssessmentService)
+        public ShipmentService(AppDbContext context)
         {
             _context = context;
-            _riskAssessmentService = riskAssessmentService;
         }
 
         public async Task<IEnumerable<Shipment>> GetAllShipmentsAsync()
@@ -44,7 +42,6 @@ namespace CosmoCargo.Services
             return await _context.Shipments
                 .Include(s => s.Customer)
                 .Include(s => s.Pilot)
-                .Include(s => s.TollForm)
                 .FirstOrDefaultAsync(s => s.Id == id);
         }
 
@@ -92,4 +89,4 @@ namespace CosmoCargo.Services
             return shipment;
         }
     }
-} 
+}

@@ -43,7 +43,6 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IShipmentService, ShipmentService>();
-builder.Services.AddScoped<IRiskAssessmentService, RiskAssessmentService>();
 
 var app = builder.Build();
 

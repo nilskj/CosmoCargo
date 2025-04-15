@@ -81,26 +81,6 @@ namespace CosmoCargo.Data
 
             context.Shipments.AddRange(shipments);
             context.SaveChanges();
-
-            var tollForms = new List<TollForm>
-            {
-                new TollForm
-                {
-                    Id = Guid.NewGuid(),
-                    ShipmentId = shipments[0].Id,
-                    ContainsLifeforms = false,
-                    IsPlasmaActive = true,
-                    PlasmaStabilityLevel = 8,
-                    OriginPlanetLawsConfirmed = true,
-                    QuarantineRequired = false,
-                    CustomsNotes = "Standard plasma-material för forskningsändamål",
-                    SubmittedById = users.First(u => u.Role == UserRole.Customer).Id,
-                    CreatedAt = DateTime.UtcNow
-                }
-            };
-
-            context.TollForms.AddRange(tollForms);
-            context.SaveChanges();
         }
 
         private static string HashPassword(string password)

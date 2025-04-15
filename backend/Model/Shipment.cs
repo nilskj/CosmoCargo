@@ -33,6 +33,5 @@ namespace CosmoCargo.Models
 
         public virtual User Customer { get; set; } = null!;
         public virtual User? Pilot { get; set; }
-        public virtual TollForm? TollForm { get; set; }
     }
 } 

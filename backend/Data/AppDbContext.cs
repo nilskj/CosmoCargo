@@ -11,7 +11,6 @@ namespace CosmoCargo.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Shipment> Shipments { get; set; }
-        public DbSet<TollForm> TollForms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,12 +26,6 @@ namespace CosmoCargo.Data
                 .HasForeignKey(s => s.PilotId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
-
-            modelBuilder.Entity<TollForm>()
-                .HasOne(t => t.Shipment)
-                .WithOne(s => s.TollForm)
-                .HasForeignKey<TollForm>(t => t.ShipmentId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
