@@ -1,5 +1,5 @@
 using CosmoCargo.Data;
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Services

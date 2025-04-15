@@ -1,4 +1,4 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using CosmoCargo.Services;
 using CosmoCargo.Utils;
 using System.Security.Claims;

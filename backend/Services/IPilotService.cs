@@ -1,4 +1,4 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 
 namespace CosmoCargo.Services
 {

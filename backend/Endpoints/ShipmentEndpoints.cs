@@ -1,4 +1,4 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using CosmoCargo.Services;
 using CosmoCargo.Utils;
 using System.Security.Claims;
@@ -67,8 +67,9 @@ namespace CosmoCargo.Endpoints
                 Origin = request.Origin,
                 Destination = request.Destination,
                 Weight = request.Weight,
-                Category = request.Category,
-                Priority = request.Priority
+                Cargo = request.Cargo,
+                Priority = request.Priority,
+                ScheduledDate = request.ScheduledDate
             };
 
             var createdShipment = await shipmentService.CreateShipmentAsync(shipment);
@@ -121,8 +122,9 @@ namespace CosmoCargo.Endpoints
         public string Origin { get; set; } = string.Empty;
         public string Destination { get; set; } = string.Empty;
         public decimal Weight { get; set; }
-        public string Category { get; set; } = string.Empty;
+        public string Cargo { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
+        public DateTime? ScheduledDate { get; set; }
     }
 
     public class UpdateShipmentStatusRequest

@@ -1,4 +1,4 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using CosmoCargo.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

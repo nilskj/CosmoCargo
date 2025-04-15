@@ -1,4 +1,4 @@
-namespace CosmoCargo.Models
+namespace CosmoCargo.Model
 {
     public enum RiskLevel
     {
@@ -7,4 +7,4 @@ namespace CosmoCargo.Models
         High,
         Critical
     }
-} 
+}

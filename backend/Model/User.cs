@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace CosmoCargo.Models
+namespace CosmoCargo.Model
 {
     public class User
     {
@@ -13,6 +13,11 @@ namespace CosmoCargo.Models
         
         public UserRole Role { get; set; }
         public DateTime CreatedAt { get; set; }
+
+#region Pilot-specific properties
+        public string Experience { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
+#endregion
         
         [JsonIgnore]
         public virtual ICollection<Shipment>? CustomerShipments { get; set; }

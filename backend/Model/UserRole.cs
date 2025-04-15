@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-namespace CosmoCargo.Models
+namespace CosmoCargo.Model
 {
     public enum UserRole
     {
@@ -8,4 +6,4 @@ namespace CosmoCargo.Models
         Pilot,
         Admin
     }
-} 
+}

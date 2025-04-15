@@ -1,4 +1,4 @@
-namespace CosmoCargo.Models
+namespace CosmoCargo.Model
 {
     public enum ShipmentStatus
     {
@@ -7,4 +7,4 @@ namespace CosmoCargo.Models
         Delivered,
         LostInBlackHole
     }
-} 
+}

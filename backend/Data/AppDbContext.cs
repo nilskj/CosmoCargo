@@ -1,4 +1,4 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Data
@@ -44,4 +44,4 @@ namespace CosmoCargo.Data
                 .HasConversion<string>();
         }
     }
-} 
+}
