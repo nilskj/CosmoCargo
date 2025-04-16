@@ -9,9 +9,9 @@ namespace CosmoCargo.Data
     {
         private static readonly Random _random = new Random();
         private static readonly ConcurrentDictionary<string, byte> _takenEmails = new ConcurrentDictionary<string, byte>();
-        private const int BatchSize = 50_000;
+        private const int BatchSize = 100_000;
         private const int MaxRetries = 5;
-        private const int MaxDegreeOfParallelism = 3;
+        private const int MaxDegreeOfParallelism = 5;
         private const int DeadlockRetryDelay = 2000;
         private static readonly string[] _origins = new[]
         {
@@ -127,7 +127,7 @@ namespace CosmoCargo.Data
                 await writer.WriteAsync(user.Name);
                 await writer.WriteAsync(user.Email);
                 await writer.WriteAsync(user.PasswordHash);
-                await writer.WriteAsync(user.Role.ToString());
+                await writer.WriteAsync((int)user.Role);
                 await writer.WriteAsync(user.Experience);
                 await writer.WriteAsync(user.IsActive);
                 await writer.WriteAsync(user.CreatedAt);
@@ -156,8 +156,8 @@ namespace CosmoCargo.Data
                 await writer.WriteAsync(shipment.Weight);
                 await writer.WriteAsync(shipment.Cargo);
                 await writer.WriteAsync(shipment.Priority);
-                await writer.WriteAsync(shipment.Status.ToString());
-                await writer.WriteAsync(shipment.RiskLevel.ToString());
+                await writer.WriteAsync((int)shipment.Status);
+                await writer.WriteAsync((int)shipment.RiskLevel);
                 await writer.WriteAsync(shipment.ScheduledDate);
                 await writer.WriteAsync(shipment.CreatedAt);
                 await writer.WriteAsync(shipment.UpdatedAt);
@@ -232,10 +232,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                if ((batch + 1) % 5 == 0)
-                {
-                    Log($"> Processed {(batch + 1) * BatchSize:N0} customers");
-                }
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalCustomers):N0} customers");
             });
 
             Log("Customer seeding completed!");
@@ -312,10 +309,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                if ((batch + 1) % 5 == 0)
-                {
-                    Log($"> Processed {(batch + 1) * BatchSize:N0} pilots");
-                }
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalPilots):N0} pilots");
             });
 
             Log("Pilot seeding completed!");
@@ -387,10 +381,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                if ((batch + 1) % 5 == 0)
-                {
-                    Log($"> Processed {(batch + 1) * BatchSize:N0} admins");
-                }
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalAdmins):N0} admins");
             });
 
             Log("Admin seeding completed!");
@@ -486,10 +477,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                if ((batch + 1) % 5 == 0)
-                {
-                    Log($"> Processed {(batch + 1) * BatchSize:N0} shipments");
-                }
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalShipments):N0} shipments");
             });
 
             Log("Shipment seeding completed!");
