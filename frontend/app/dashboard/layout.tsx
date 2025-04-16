@@ -39,7 +39,7 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col overflow-hidden">
         <DashboardHeader onMenuToggle={toggleMobileMenu} />
 
-        <main className="flex-1 overflow-y-auto bg-space-dark p-4">
+        <main className="flex-1 overflow-y-auto bg-space-dark px-8 py-4">
           {children}
         </main>
       </div>

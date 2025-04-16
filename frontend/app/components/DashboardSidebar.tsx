@@ -24,7 +24,7 @@ const navItems = [
     roles: ["customer"],
     title: "Kundmeny",
     items: [
-      { icon: Home, label: "Översikt", href: "/dashboard/dashboard-overview" },
+      { icon: Home, label: "Översikt", href: "/dashboard" },
       { icon: Package, label: "Boka Frakt", href: "/dashboard/book-shipment" },
       {
         icon: PackageCheck,
@@ -42,7 +42,7 @@ const navItems = [
     roles: ["pilot"],
     title: "Pilotmeny",
     items: [
-      { icon: Home, label: "Översikt", href: "/dashboard/dashboard-overview" },
+      { icon: Home, label: "Översikt", href: "/dashboard" },
       {
         icon: Rocket,
         label: "Tilldelade Frakter",
@@ -54,7 +54,7 @@ const navItems = [
     roles: ["admin"],
     title: "Adminmeny",
     items: [
-      { icon: Home, label: "Översikt", href: "/dashboard/dashboard-overview" },
+      { icon: Home, label: "Översikt", href: "/dashboard" },
       {
         icon: ClipboardList,
         label: "Fraktöversikt",

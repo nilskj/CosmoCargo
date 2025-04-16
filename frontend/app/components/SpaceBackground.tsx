@@ -19,7 +19,7 @@ const SpaceBackground = ({
     if (!container) return;
 
     // Clear existing stars
-    const existingStars = container.querySelectorAll(".star, .shooting-star");
+    const existingStars = container.querySelectorAll(".star");
     existingStars.forEach((star) => star.remove());
 
     // GSAP timeline for orchestrating animations
@@ -111,88 +111,10 @@ const SpaceBackground = ({
       });
     }
 
-    // Create shooting stars
-    for (let i = 0; i < 5; i++) {
-      createShootingStar(container, i * 3);
-    }
-
-    function createShootingStar(
-      container: HTMLDivElement,
-      initialDelay: number
-    ) {
-      const shootingStar = document.createElement("div");
-      shootingStar.classList.add("shooting-star");
-
-      // Random starting position (from different sides)
-      const fromLeft = Math.random() > 0.5;
-      const topPosition = Math.random() * 70;
-      shootingStar.style.top = `${topPosition}%`;
-
-      // Set the shooting star's tail to extend in the direction of travel
-      const shootingStarTail = document.createElement("div");
-      shootingStarTail.classList.add("shooting-star-tail");
-
-      // Position and rotation based on direction
-      if (fromLeft) {
-        shootingStar.style.left = "-50px";
-        shootingStar.style.transform = "rotate(15deg)";
-        // Tail goes to the left of the star head
-        shootingStarTail.style.right = "0";
-        shootingStarTail.style.transform = "translateX(100%)";
-      } else {
-        shootingStar.style.right = "-50px";
-        shootingStar.style.transform = "rotate(165deg)";
-        // Tail goes to the right of the star head
-        shootingStarTail.style.left = "0";
-        shootingStarTail.style.transform = "translateX(-100%)";
-      }
-
-      // Add the tail to the shooting star
-      shootingStar.appendChild(shootingStarTail);
-      container.appendChild(shootingStar);
-
-      // Animate the shooting star
-      const tl = gsap.timeline({
-        delay: initialDelay + Math.random() * 5,
-        onComplete: () => {
-          // Remove the old shooting star and create a new one
-          shootingStar.remove();
-          createShootingStar(container, Math.random() * 5);
-        },
-      });
-
-      // Starting opacity 0
-      gsap.set(shootingStar, { opacity: 0 });
-
-      // Animation sequence
-      tl.to(shootingStar, {
-        opacity: 1,
-        duration: 0.3,
-      })
-        .to(
-          shootingStar,
-          {
-            x: fromLeft ? window.innerWidth + 100 : -(window.innerWidth + 100),
-            y: 100 + Math.random() * 100,
-            duration: 1.5,
-            ease: "power1.in",
-          },
-          "<"
-        )
-        .to(
-          shootingStar,
-          {
-            opacity: 0,
-            duration: 0.3,
-          },
-          ">-0.3"
-        );
-    }
-
     return () => {
       // Cleanup GSAP animations on unmount
       masterTimeline.kill();
-      gsap.killTweensOf(container.querySelectorAll(".star, .shooting-star"));
+      gsap.killTweensOf(container.querySelectorAll(".star"));
     };
   }, [starCount]);
 

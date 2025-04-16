@@ -11,7 +11,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { Package, ArrowRight } from "lucide-react";

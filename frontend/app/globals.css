@@ -62,7 +62,7 @@
 /* Custom classes */
 @layer components {
   .space-card {
-    @apply bg-card-gradient backdrop-blur-sm border border-space-secondary/30 rounded-lg shadow-lg;
+    @apply bg-space-primary border border-space-secondary border-opacity-50 rounded-xl overflow-hidden;
   }
   
   .space-button {
