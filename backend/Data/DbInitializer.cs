@@ -1,12 +1,18 @@
 using CosmoCargo.Model;
-using System.Security.Cryptography;
-using System.Text;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
+using Npgsql;
 
 namespace CosmoCargo.Data
 {
     public static class DbInitializer
     {
         private static readonly Random _random = new Random();
+        private static readonly ConcurrentDictionary<string, byte> _takenEmails = new ConcurrentDictionary<string, byte>();
+        private const int BatchSize = 50_000;
+        private const int MaxRetries = 5;
+        private const int MaxDegreeOfParallelism = 3;
+        private const int DeadlockRetryDelay = 2000;
         private static readonly string[] _origins = new[]
         {
             "Stockholm, Sweden", "Gothenburg, Sweden", "Malmö, Sweden",
@@ -67,210 +73,383 @@ namespace CosmoCargo.Data
             "cargo handling", "space logistics management", "interplanetary operations"
         };
 
-        private static readonly IList<string> _takenEmails = [];
-
-        private static string GenerateUniqueEmail(AppDbContext context, string firstName, string lastName, string domain)
+        private static string GenerateUniqueEmail(string firstName, string lastName, string domain)
         {
             var baseEmail = $"{firstName.ToLower()}.{lastName.ToLower()}";
-            var counter = 2;
             var email = $"{baseEmail}@{domain}";
+            var counter = 2;
 
-            while (_takenEmails.Contains(email) || context.Users.Any(u => u.Email == email))
+            while (!_takenEmails.TryAdd(email, 0))
             {
                 email = $"{baseEmail}.{counter}@{domain}";
                 counter++;
             }
 
-            _takenEmails.Add(email);
-
             return email;
         }
 
-        public static void Initialize(AppDbContext context)
+        private static void Log(string message)
         {
-            if (context.Users.Any())
-                return;
-
-            SeedCustomers(context);
-            SeedPilots(context);
-            SeedAdmins(context);
-            SeedShipments(context);
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
         }
 
-        private static void SeedCustomers(AppDbContext context)
+        public static async Task InitializeAsync(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (await context.Users.AnyAsync())
+                return;
+
+            Log("DATABASE: Start seeding");
+
+            await SeedCustomers(serviceProvider);
+            await SeedPilots(serviceProvider);
+            await SeedAdmins(serviceProvider);
+            await SeedShipments(serviceProvider);
+
+            Log("DATABASE: Seeding completed!");
+        }
+
+        private static async Task BulkInsertUsersAsync(AppDbContext context, List<User> users)
+        {
+            var connection = (NpgsqlConnection)context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+                await connection.OpenAsync();
+
+            using var writer = await connection.BeginBinaryImportAsync(
+                "COPY users (id, name, email, password_hash, role, experience, is_active, created_at) FROM STDIN (FORMAT BINARY)");
+
+            foreach (var user in users)
+            {
+                await writer.StartRowAsync();
+                await writer.WriteAsync(user.Id);
+                await writer.WriteAsync(user.Name);
+                await writer.WriteAsync(user.Email);
+                await writer.WriteAsync(user.PasswordHash);
+                await writer.WriteAsync(user.Role.ToString());
+                await writer.WriteAsync(user.Experience);
+                await writer.WriteAsync(user.IsActive);
+                await writer.WriteAsync(user.CreatedAt);
+            }
+
+            await writer.CompleteAsync();
+        }
+
+        private static async Task BulkInsertShipmentsAsync(AppDbContext context, List<Shipment> shipments)
+        {
+            var connection = (NpgsqlConnection)context.Database.GetDbConnection();
+            if (connection.State != System.Data.ConnectionState.Open)
+                await connection.OpenAsync();
+
+            using var writer = await connection.BeginBinaryImportAsync(
+                "COPY shipments (id, customer_id, pilot_id, origin, destination, weight, cargo, priority, status, risk_level, scheduled_date, created_at, updated_at) FROM STDIN (FORMAT BINARY)");
+
+            foreach (var shipment in shipments)
+            {
+                await writer.StartRowAsync();
+                await writer.WriteAsync(shipment.Id);
+                await writer.WriteAsync(shipment.CustomerId);
+                await writer.WriteAsync(shipment.PilotId);
+                await writer.WriteAsync(shipment.Origin);
+                await writer.WriteAsync(shipment.Destination);
+                await writer.WriteAsync(shipment.Weight);
+                await writer.WriteAsync(shipment.Cargo);
+                await writer.WriteAsync(shipment.Priority);
+                await writer.WriteAsync(shipment.Status.ToString());
+                await writer.WriteAsync(shipment.RiskLevel.ToString());
+                await writer.WriteAsync(shipment.ScheduledDate);
+                await writer.WriteAsync(shipment.CreatedAt);
+                await writer.WriteAsync(shipment.UpdatedAt);
+            }
+
+            await writer.CompleteAsync();
+        }
+
+        private static async Task SeedCustomers(IServiceProvider serviceProvider)
         {
             int totalCustomers = Random.Shared.Next(500_000, 700_000);
-            const int batchSize = 1000;
-            var batches = totalCustomers / batchSize;
+            var batches = (int)Math.Ceiling((double)totalCustomers / BatchSize);
 
-            Console.WriteLine($"Starting to seed {totalCustomers:N0} customers...");
+            Log($"Starting to seed {totalCustomers:N0} customers");
 
-            for (int batch = 0; batch < batches; batch++)
+            var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
+            await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
-                var customers = new List<User>(batchSize);
+                using var scope = serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var customers = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
+                var batchSize = Math.Min(BatchSize, totalCustomers - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
                     var firstName = _firstNames[_random.Next(_firstNames.Length)];
                     var lastName = _lastNames[_random.Next(_lastNames.Length)];
                     var experience = $"{_experienceLevels[_random.Next(_experienceLevels.Length)]} in {_industries[_random.Next(_industries.Length)]}";
-                    var userNumber = batch * batchSize + i + 1;
+                    var userNumber = batch * BatchSize + i + 1;
 
                     customers.Add(new User
                     {
                         Id = Guid.NewGuid(),
                         Name = $"{firstName} {lastName}",
-                        Email = GenerateUniqueEmail(context, firstName, lastName, "example.com"),
+                        Email = GenerateUniqueEmail(firstName, lastName, "example.com"),
                         PasswordHash = Utils.Crypto.HashPassword($"Customer{userNumber}"),
                         Role = UserRole.Customer,
                         Experience = experience,
-                        IsActive = _random.Next(100) < 95, // 95% active
+                        IsActive = _random.Next(100) < 95,
                         CreatedAt = now.AddDays(-_random.Next(0, 365))
                     });
                 }
 
-                context.Users.AddRange(customers);
-                context.SaveChanges();
-
-                if ((batch + 1) % 10 == 0)
+                for (int retry = 0; retry < MaxRetries; retry++)
                 {
-                    Console.WriteLine($"Processed {(batch + 1) * batchSize:N0} customers...");
+                    try
+                    {
+                        using var transaction = await context.Database.BeginTransactionAsync();
+                        try
+                        {
+                            await BulkInsertUsersAsync(context, customers);
+                            await transaction.CommitAsync();
+                            break;
+                        }
+                        catch
+                        {
+                            await transaction.RollbackAsync();
+                            throw;
+                        }
+                    }
+                    catch (Exception ex) when (IsDeadlockException(ex) && retry < MaxRetries - 1)
+                    {
+                        Log($"> Deadlock detected on customer batch {batch + 1}, retry {retry + 1}");
+                        await Task.Delay(DeadlockRetryDelay * (retry + 1));
+                    }
+                    catch (Exception ex) when (retry < MaxRetries - 1)
+                    {
+                        Log($"> Retry {retry + 1} for customer batch {batch + 1} due to: {ex.Message}");
+                        await Task.Delay(1000 * (retry + 1));
+                    }
                 }
-            }
 
-            Console.WriteLine("Customer seeding completed!");
+                if ((batch + 1) % 5 == 0)
+                {
+                    Log($"> Processed {(batch + 1) * BatchSize:N0} customers");
+                }
+            });
+
+            Log("Customer seeding completed!");
         }
 
-        private static void SeedPilots(AppDbContext context)
+        private static bool IsDeadlockException(Exception ex)
+        {
+            return ex is PostgresException pgEx && pgEx.SqlState == "40P01";
+        }
+
+        private static async Task SeedPilots(IServiceProvider serviceProvider)
         {
             int totalPilots = Random.Shared.Next(300_000, 400_000);
-            const int batchSize = 1000;
-            var batches = totalPilots / batchSize;
+            var batches = (int)Math.Ceiling((double)totalPilots / BatchSize);
 
-            Console.WriteLine($"Starting to seed {totalPilots:N0} pilots...");
+            Log($"Starting to seed {totalPilots:N0} pilots");
 
-            for (int batch = 0; batch < batches; batch++)
+            var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
+            await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
-                var pilots = new List<User>(batchSize);
+                using var scope = serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var pilots = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
+                var batchSize = Math.Min(BatchSize, totalPilots - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
                     var firstName = _firstNames[_random.Next(_firstNames.Length)];
                     var lastName = _lastNames[_random.Next(_lastNames.Length)];
                     var experience = $"{_experienceLevels[_random.Next(_experienceLevels.Length)]} of space piloting";
-                    var userNumber = batch * batchSize + i + 1;
-                    var baseEmail = $"pilot{userNumber}";
+                    var userNumber = batch * BatchSize + i + 1;
 
                     pilots.Add(new User
                     {
                         Id = Guid.NewGuid(),
                         Name = $"{firstName} {lastName}",
-                        Email = GenerateUniqueEmail(context, firstName, lastName, "cosmocargo.com"),
+                        Email = GenerateUniqueEmail(firstName, lastName, "cosmocargo.com"),
                         PasswordHash = Utils.Crypto.HashPassword($"Pilot{userNumber}"),
                         Role = UserRole.Pilot,
                         Experience = experience,
-                        IsActive = _random.Next(100) < 90, // 90% active
+                        IsActive = _random.Next(100) < 90,
                         CreatedAt = now.AddDays(-_random.Next(0, 365))
                     });
                 }
 
-                context.Users.AddRange(pilots);
-                context.SaveChanges();
-
-                if ((batch + 1) % 10 == 0)
+                for (int retry = 0; retry < MaxRetries; retry++)
                 {
-                    Console.WriteLine($"Processed {(batch + 1) * batchSize:N0} pilots...");
+                    try
+                    {
+                        using var transaction = await context.Database.BeginTransactionAsync();
+                        try
+                        {
+                            await BulkInsertUsersAsync(context, pilots);
+                            await transaction.CommitAsync();
+                            break;
+                        }
+                        catch
+                        {
+                            await transaction.RollbackAsync();
+                            throw;
+                        }
+                    }
+                    catch (Exception ex) when (IsDeadlockException(ex) && retry < MaxRetries - 1)
+                    {
+                        Log($"> Deadlock detected on pilot batch {batch + 1}, retry {retry + 1}");
+                        await Task.Delay(DeadlockRetryDelay * (retry + 1));
+                    }
+                    catch (Exception ex) when (retry < MaxRetries - 1)
+                    {
+                        Log($"> Retry {retry + 1} for pilot batch {batch + 1} due to: {ex.Message}");
+                        await Task.Delay(1000 * (retry + 1));
+                    }
                 }
-            }
 
-            Console.WriteLine("Pilot seeding completed!");
+                if ((batch + 1) % 5 == 0)
+                {
+                    Log($"> Processed {(batch + 1) * BatchSize:N0} pilots");
+                }
+            });
+
+            Log("Pilot seeding completed!");
         }
 
-        private static void SeedAdmins(AppDbContext context)
+        private static async Task SeedAdmins(IServiceProvider serviceProvider)
         {
             int totalAdmins = Random.Shared.Next(100_000, 200_000);
-            const int batchSize = 1000;
-            var batches = totalAdmins / batchSize;
+            var batches = (int)Math.Ceiling((double)totalAdmins / BatchSize);
 
-            Console.WriteLine($"Starting to seed {totalAdmins:N0} admins...");
+            Log($"Starting to seed {totalAdmins:N0} admins");
 
-            for (int batch = 0; batch < batches; batch++)
+            var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
+            await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
-                var admins = new List<User>(batchSize);
+                using var scope = serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var admins = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
+                var batchSize = Math.Min(BatchSize, totalAdmins - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
                     var firstName = _firstNames[_random.Next(_firstNames.Length)];
                     var lastName = _lastNames[_random.Next(_lastNames.Length)];
                     var experience = $"{_experienceLevels[_random.Next(_experienceLevels.Length)]} in space logistics management";
-                    var userNumber = batch * batchSize + i + 1;
-                    var baseEmail = $"admin{userNumber}";
+                    var userNumber = batch * BatchSize + i + 1;
 
                     admins.Add(new User
                     {
                         Id = Guid.NewGuid(),
                         Name = $"{firstName} {lastName}",
-                        Email = GenerateUniqueEmail(context, firstName, lastName, "cosmocargo.com"),
+                        Email = GenerateUniqueEmail(firstName, lastName, "cosmocargo.com"),
                         PasswordHash = Utils.Crypto.HashPassword($"Admin{userNumber}"),
                         Role = UserRole.Admin,
                         Experience = experience,
-                        IsActive = _random.Next(100) < 98, // 98% active
+                        IsActive = _random.Next(100) < 98,
                         CreatedAt = now.AddDays(-_random.Next(0, 365))
                     });
                 }
 
-                context.Users.AddRange(admins);
-                context.SaveChanges();
-
-                if ((batch + 1) % 10 == 0)
+                for (int retry = 0; retry < MaxRetries; retry++)
                 {
-                    Console.WriteLine($"Processed {(batch + 1) * batchSize:N0} admins...");
+                    try
+                    {
+                        using var transaction = await context.Database.BeginTransactionAsync();
+                        try
+                        {
+                            await BulkInsertUsersAsync(context, admins);
+                            await transaction.CommitAsync();
+                            break;
+                        }
+                        catch
+                        {
+                            await transaction.RollbackAsync();
+                            throw;
+                        }
+                    }
+                    catch (Exception ex) when (IsDeadlockException(ex) && retry < MaxRetries - 1)
+                    {
+                        Log($"> Deadlock detected on admin batch {batch + 1}, retry {retry + 1}");
+                        await Task.Delay(DeadlockRetryDelay * (retry + 1));
+                    }
+                    catch (Exception ex) when (retry < MaxRetries - 1)
+                    {
+                        Log($"> Retry {retry + 1} for admin batch {batch + 1} due to: {ex.Message}");
+                        await Task.Delay(1000 * (retry + 1));
+                    }
                 }
-            }
 
-            Console.WriteLine("Admin seeding completed!");
+                if ((batch + 1) % 5 == 0)
+                {
+                    Log($"> Processed {(batch + 1) * BatchSize:N0} admins");
+                }
+            });
+
+            Log("Admin seeding completed!");
         }
 
-        private static void SeedShipments(AppDbContext context)
+        private static async Task SeedShipments(IServiceProvider serviceProvider)
         {
-            var users = context.Users.ToList();
-            var customers = users.Where(u => u.Role == UserRole.Customer).ToList();
-            var pilots = users.Where(u => u.Role == UserRole.Pilot).ToList();
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var customerIds = await context.Users
+                .Where(u => u.Role == UserRole.Customer)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            var pilotIds = await context.Users
+                .Where(u => u.Role == UserRole.Pilot)
+                .Select(u => u.Id)
+                .ToListAsync();
+
             var statuses = Enum.GetValues<ShipmentStatus>();
             var riskLevels = Enum.GetValues<RiskLevel>();
             var priorities = new[] { "Low", "Normal", "High", "Urgent" };
 
             int totalShipments = Random.Shared.Next(12_000_000, 16_000_000);
-            const int batchSize = 1000;
-            var batches = totalShipments / batchSize;
+            var batches = (int)Math.Ceiling((double)totalShipments / BatchSize);
 
-            Console.WriteLine($"Starting to seed {totalShipments:N0} shipments...");
+            Log($"Starting to seed {totalShipments:N0} shipments");
 
-            for (int batch = 0; batch < batches; batch++)
+            var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
+            await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
-                var shipments = new List<Shipment>(batchSize);
+                using var scope = serviceProvider.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                var shipments = new List<Shipment>(BatchSize);
                 var now = DateTime.UtcNow;
+                var batchSize = Math.Min(BatchSize, totalShipments - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
                     var scheduledDate = now.AddDays(_random.Next(-365, 365));
                     var createdAt = scheduledDate.AddDays(-_random.Next(1, 30));
                     var updatedAt = createdAt.AddDays(_random.Next(0, 30));
+                    var status = statuses[_random.Next(statuses.Length)];
 
                     shipments.Add(new Shipment
                     {
                         Id = Guid.NewGuid(),
-                        CustomerId = customers[_random.Next(customers.Count)].Id,
-                        PilotId = pilots[_random.Next(pilots.Count)].Id,
+                        CustomerId = customerIds[_random.Next(customerIds.Count)],
+                        PilotId = status == ShipmentStatus.Assigned 
+                            || status == ShipmentStatus.InTransit 
+                            || status == ShipmentStatus.Delivered ? pilotIds[_random.Next(pilotIds.Count)] : null,
                         Origin = _origins[_random.Next(_origins.Length)],
                         Destination = _destinations[_random.Next(_destinations.Length)],
                         Weight = _random.Next(50, 1000),
                         Cargo = _cargoTypes[_random.Next(_cargoTypes.Length)],
                         Priority = priorities[_random.Next(priorities.Length)],
-                        Status = statuses[_random.Next(statuses.Length)],
+                        Status = status,
                         RiskLevel = riskLevels[_random.Next(riskLevels.Length)],
                         ScheduledDate = scheduledDate,
                         CreatedAt = createdAt,
@@ -278,16 +457,42 @@ namespace CosmoCargo.Data
                     });
                 }
 
-                context.Shipments.AddRange(shipments);
-                context.SaveChanges();
-
-                if ((batch + 1) % 10 == 0)
+                for (int retry = 0; retry < MaxRetries; retry++)
                 {
-                    Console.WriteLine($"Processed {(batch + 1) * batchSize:N0} shipments...");
+                    try
+                    {
+                        using var transaction = await context.Database.BeginTransactionAsync();
+                        try
+                        {
+                            await BulkInsertShipmentsAsync(context, shipments);
+                            await transaction.CommitAsync();
+                            break;
+                        }
+                        catch
+                        {
+                            await transaction.RollbackAsync();
+                            throw;
+                        }
+                    }
+                    catch (Exception ex) when (IsDeadlockException(ex) && retry < MaxRetries - 1)
+                    {
+                        Log($"> Deadlock detected on shipment batch {batch + 1}, retry {retry + 1}");
+                        await Task.Delay(DeadlockRetryDelay * (retry + 1));
+                    }
+                    catch (Exception ex) when (retry < MaxRetries - 1)
+                    {
+                        Log($"> Retry {retry + 1} for shipment batch {batch + 1} due to: {ex.Message}");
+                        await Task.Delay(1000 * (retry + 1));
+                    }
                 }
-            }
 
-            Console.WriteLine("Shipment seeding completed!");
+                if ((batch + 1) % 5 == 0)
+                {
+                    Log($"> Processed {(batch + 1) * BatchSize:N0} shipments");
+                }
+            });
+
+            Log("Shipment seeding completed!");
         }
     }
 }

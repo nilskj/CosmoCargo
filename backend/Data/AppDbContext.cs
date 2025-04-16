@@ -14,34 +14,44 @@ namespace CosmoCargo.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Shipment>()
-                .HasOne(s => s.Customer)
-                .WithMany(u => u.CustomerShipments)
-                .HasForeignKey(s => s.CustomerId)
-                .OnDelete(DeleteBehavior.Restrict);
+            base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Shipment>()
-                .HasOne(s => s.Pilot)
-                .WithMany(u => u.PilotShipments)
-                .HasForeignKey(s => s.PilotId)
-                .OnDelete(DeleteBehavior.Restrict)
-                .IsRequired(false);
+            modelBuilder.ApplySnakeCaseNamingConvention();
 
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Email).IsRequired();
+                entity.Property(e => e.PasswordHash).IsRequired();
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Role).IsRequired();
+                entity.Property(e => e.Experience).IsRequired();
+                entity.Property(e => e.IsActive).IsRequired();
+                entity.HasIndex(e => e.Email).IsUnique();
 
-            modelBuilder.Entity<Shipment>()
-                .Property(s => s.Status)
-                .HasConversion<string>();
+                entity.HasMany(u => u.CustomerShipments)
+                    .WithOne(s => s.Customer)
+                    .HasForeignKey(s => s.CustomerId)
+                    .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Shipment>()
-                .Property(s => s.RiskLevel)
-                .HasConversion<string>();
+                entity.HasMany(u => u.PilotShipments)
+                    .WithOne(s => s.Pilot)
+                    .HasForeignKey(s => s.PilotId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasConversion<string>();
+            modelBuilder.Entity<Shipment>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Origin).IsRequired();
+                entity.Property(e => e.Destination).IsRequired();
+                entity.Property(e => e.Cargo).IsRequired();
+                entity.Property(e => e.Status).IsRequired();
+                entity.Property(e => e.CreatedAt).IsRequired();
+                entity.Property(e => e.UpdatedAt).IsRequired();
+            });
         }
     }
 }
