@@ -1,10 +1,10 @@
 "use client";
 
-import SpaceBackground from "@/app/components/SpaceBackground";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
-import HeroSection from "@/app/components/HeroSection";
-import FeatureList from "@/app/components/FeatureList";
+import SpaceBackground from "@/components/SpaceBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import HeroSection from "@/components/HeroSection";
+import FeatureList from "@/components/FeatureList";
 
 export default function Home() {
   return (

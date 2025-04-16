@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Menu, X, Rocket, User, LogIn, LogOut } from "lucide-react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -37,11 +37,11 @@ const Header = () => {
   };
 
   return (
-    <header className="relative z-50 w-full border-b border-space-secondary/30 bg-space-primary/80 backdrop-blur-md">
+    <header className="relative z-50 w-full">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Rocket className="h-8 w-8 text-space-accent-purple" />
-          <span className="text-xl md:text-2xl font-bold space-gradient-text">
+          <span className="text-xl md:text-2xl space-gradient-text font-orbitron font-bold">
             CosmoCargo™
           </span>
         </div>

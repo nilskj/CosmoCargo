@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/app/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ArrowRight, Rocket } from "lucide-react";
 import Link from "next/link";
 
@@ -15,8 +15,9 @@ const HeroSection = () => {
             <span>Ledande inom rymdlogistik</span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6">
             <span className="space-gradient-text">Intergalaktisk</span>
+            <br />
             Fraktcentral
           </h1>
 
@@ -45,15 +46,15 @@ const HeroSection = () => {
 
           <div className="mt-12 flex items-center justify-center space-x-8">
             <div>
-              <p className="text-3xl font-bold space-gradient-text">9000+</p>
+              <p className="text-3xl font-medium space-gradient-text">9000+</p>
               <p className="text-sm text-space-text-secondary">Destinationer</p>
             </div>
             <div>
-              <p className="text-3xl font-bold space-gradient-text">24/7</p>
+              <p className="text-3xl font-medium space-gradient-text">24/7</p>
               <p className="text-sm text-space-text-secondary">Support</p>
             </div>
             <div>
-              <p className="text-3xl font-bold space-gradient-text">99.9%</p>
+              <p className="text-3xl font-medium space-gradient-text">99.9%</p>
               <p className="text-sm text-space-text-secondary">
                 Framgångsrika leveranser
               </p>

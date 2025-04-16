@@ -2,10 +2,10 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import SpaceBackground from "./components/SpaceBackground";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import { Button } from "./components/ui/button";
+import SpaceBackground from "@/components/SpaceBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 import { RefreshCcw, Home } from "lucide-react";
 
 export default function Error({
@@ -35,8 +35,8 @@ export default function Error({
               <RefreshCcw className="h-10 w-10 text-space-warning" />
             </div>
 
-            <h1 className="text-5xl font-bold mb-2">Oj då!</h1>
-            <p className="text-2xl font-bold mb-4 space-gradient-text">
+            <h1 className="text-5xl font-medium mb-2">Oj då!</h1>
+            <p className="text-2xl font-medium mb-4 space-gradient-text">
               Kosmiskt fel
             </p>
             <p className="text-space-text-secondary mb-8">

@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import SpaceBackground from "@/app/components/SpaceBackground";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import SpaceBackground from "@/components/SpaceBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Search } from "lucide-react";
 
 const FAQ = () => {
@@ -14,7 +14,7 @@ const FAQ = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <div className="space-card p-8 mb-10">
-            <h1 className="text-4xl font-bold mb-6 space-gradient-text">
+            <h1 className="text-4xl font-medium mb-6 space-gradient-text">
               Vanliga frågor
             </h1>
 
@@ -31,7 +31,7 @@ const FAQ = () => {
 
             <div className="space-y-8">
               <div className="border-b border-space-secondary pb-6">
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-medium mb-3">
                   Hur spårar jag min frakt?
                 </h3>
                 <p className="text-space-text-secondary">
@@ -44,7 +44,7 @@ const FAQ = () => {
               </div>
 
               <div className="border-b border-space-secondary pb-6">
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-medium mb-3">
                   Vad händer om min frakt skadas under transport?
                 </h3>
                 <p className="text-space-text-secondary">
@@ -57,7 +57,7 @@ const FAQ = () => {
               </div>
 
               <div className="border-b border-space-secondary pb-6">
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-medium mb-3">
                   Hur lång tid tar en leverans?
                 </h3>
                 <p className="text-space-text-secondary">
@@ -71,7 +71,7 @@ const FAQ = () => {
               </div>
 
               <div className="border-b border-space-secondary pb-6">
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-medium mb-3">
                   Kan jag skicka levande organismer?
                 </h3>
                 <p className="text-space-text-secondary">
@@ -84,7 +84,7 @@ const FAQ = () => {
               </div>
 
               <div className="border-b border-space-secondary pb-6">
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-medium mb-3">
                   Vilka betalningsmetoder accepterar ni?
                 </h3>
                 <p className="text-space-text-secondary">
@@ -97,7 +97,7 @@ const FAQ = () => {
               </div>
 
               <div className="border-b border-space-secondary pb-6">
-                <h3 className="text-xl font-bold mb-3">
+                <h3 className="text-xl font-medium mb-3">
                   Kan jag ändra leveransadress efter att frakten har skickats?
                 </h3>
                 <p className="text-space-text-secondary">

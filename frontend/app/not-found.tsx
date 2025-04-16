@@ -1,8 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import SpaceBackground from "./components/SpaceBackground";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import { Button } from "./components/ui/button";
+import SpaceBackground from "@/components/SpaceBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 import { Home, AlertTriangle } from "lucide-react";
 
 export default function NotFound() {
@@ -21,8 +23,8 @@ export default function NotFound() {
               <AlertTriangle className="h-10 w-10 text-space-danger" />
             </div>
 
-            <h1 className="text-5xl font-bold mb-2">404</h1>
-            <p className="text-2xl font-bold mb-4 space-gradient-text">
+            <h1 className="text-5xl font-medium mb-2">404</h1>
+            <p className="text-2xl font-medium mb-4 space-gradient-text">
               Lost in Space
             </p>
             <p className="text-space-text-secondary mb-8">

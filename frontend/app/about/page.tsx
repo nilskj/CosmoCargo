@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import SpaceBackground from "@/app/components/SpaceBackground";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import SpaceBackground from "@/components/SpaceBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const About = () => {
   return (
@@ -12,7 +12,7 @@ const About = () => {
 
       <div className="container mx-auto px-4 py-16">
         <div className="space-card p-8 mb-10">
-          <h1 className="text-4xl font-bold mb-6 space-gradient-text">
+          <h1 className="text-4xl font-medium mb-6 space-gradient-text">
             Om CosmoCargo™
           </h1>
 
@@ -23,7 +23,7 @@ const About = () => {
               skicka ett paket på jorden.
             </p>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">Vår Historia</h2>
+            <h2 className="text-2xl font-medium mt-8 mb-4">Vår Historia</h2>
             <p className="mb-4">
               Det som började som ett litet fraktföretag med endast tre skepp i
               omloppsbana runt Mars har nu vuxit till galaxens mest betrodda
@@ -35,13 +35,13 @@ const About = () => {
               <div className="absolute inset-0 bg-gradient-to-r from-space-accent-blue/30 to-space-accent-purple/30 mix-blend-overlay z-10"></div>
               <div className="absolute inset-0 bg-space-dark/80"></div>
               <div className="absolute inset-0 flex items-center justify-center z-20">
-                <p className="text-2xl font-bold text-center space-gradient-text">
+                <p className="text-2xl font-medium text-center space-gradient-text">
                   Levererar sedan 2257
                 </p>
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">Vårt Uppdrag</h2>
+            <h2 className="text-2xl font-medium mt-8 mb-4">Vårt Uppdrag</h2>
             <p className="mb-4">
               Vårt uppdrag är att koppla samman galaxens avlägsna hörn genom
               säkra, snabba och pålitliga leveranser. Vi tror på att
@@ -49,7 +49,7 @@ const About = () => {
               kolonister till stora interplanetära företag.
             </p>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">Våra Värderingar</h2>
+            <h2 className="text-2xl font-medium mt-8 mb-4">Våra Värderingar</h2>
             <ul className="list-disc pl-6 mb-6">
               <li className="mb-2">
                 <strong>Säkerhet:</strong> Vi prioriterar säkerheten för din
@@ -73,10 +73,10 @@ const About = () => {
               </li>
             </ul>
 
-            <h2 className="text-2xl font-bold mt-8 mb-4">Ledningsgrupp</h2>
+            <h2 className="text-2xl font-medium mt-8 mb-4">Ledningsgrupp</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-card p-4">
-                <h3 className="text-xl font-bold mb-2">Dr. Elara Vex</h3>
+                <h3 className="text-xl font-medium mb-2">Dr. Elara Vex</h3>
                 <p className="text-sm text-space-text-secondary mb-2">
                   VD & Grundare
                 </p>
@@ -86,7 +86,7 @@ const About = () => {
                 </p>
               </div>
               <div className="space-card p-4">
-                <h3 className="text-xl font-bold mb-2">Zephyr Ando</h3>
+                <h3 className="text-xl font-medium mb-2">Zephyr Ando</h3>
                 <p className="text-sm text-space-text-secondary mb-2">
                   Teknisk Direktör
                 </p>

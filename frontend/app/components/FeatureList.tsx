@@ -26,7 +26,7 @@ const Feature: React.FC<FeatureProps> = ({ icon, title, description }) => {
           {icon}
         </div>
       </div>
-      <h3 className="text-xl font-bold text-center mb-3">{title}</h3>
+      <h3 className="text-xl font-medium text-center mb-3">{title}</h3>
       <p className="text-space-text-secondary text-center">{description}</p>
     </div>
   );
@@ -73,7 +73,7 @@ const FeatureList = () => {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 space-gradient-text">
+      <h2 className="text-3xl md:text-4xl font-medium text-center mb-4 space-gradient-text">
         Våra Tjänster
       </h2>
       <p className="text-space-text-secondary text-center max-w-2xl mx-auto mb-12">

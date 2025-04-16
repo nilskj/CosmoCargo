@@ -12,7 +12,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center mb-4">
               <Rocket className="h-6 w-6 text-space-accent-purple mr-2" />
-              <span className="text-xl font-bold space-gradient-text">
+              <span className="text-xl font-bold space-gradient-text font-orbitron">
                 CosmoCargo™
               </span>
             </div>
@@ -61,7 +61,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-4">Länkar</h3>
+            <h3 className="text-lg font-medium mb-4">Länkar</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -107,7 +107,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-4">Tjänster</h3>
+            <h3 className="text-lg font-medium mb-4">Tjänster</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -153,7 +153,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-bold mb-4">Kontakt</h3>
+            <h3 className="text-lg font-medium mb-4">Kontakt</h3>
             <ul className="space-y-4">
               <li className="flex items-start">
                 <MapPin className="h-5 w-5 text-space-accent-purple mr-2 mt-0.5" />

@@ -9,9 +9,9 @@ import {
   Package,
   Users,
 } from "lucide-react";
-import SpaceBackground from "@/app/components/SpaceBackground";
-import Header from "@/app/components/Header";
-import Footer from "@/app/components/Footer";
+import SpaceBackground from "@/components/SpaceBackground";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const Services = () => {
   return (
@@ -21,7 +21,7 @@ const Services = () => {
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-5xl mx-auto">
           <div className="space-card p-8 mb-10">
-            <h1 className="text-4xl font-bold mb-2 space-gradient-text">
+            <h1 className="text-4xl font-medium mb-2 space-gradient-text">
               Våra Tjänster
             </h1>
             <p className="text-xl text-space-text-secondary mb-12">
@@ -34,7 +34,7 @@ const Services = () => {
                 <div className="bg-space-secondary/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
                   <Package className="h-8 w-8 text-space-accent-purple" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Standardfrakt</h3>
+                <h3 className="text-xl font-medium mb-2">Standardfrakt</h3>
                 <p className="text-space-text-secondary mb-4">
                   Pålitlig och kostnadseffektiv transport för gods av alla
                   storlekar. Perfekt för regelbundna leveranser mellan
@@ -60,7 +60,7 @@ const Services = () => {
                 <div className="bg-space-secondary/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
                   <Rocket className="h-8 w-8 text-space-accent-blue" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Express Hyperspace</h3>
+                <h3 className="text-xl font-medium mb-2">Express Hyperspace</h3>
                 <p className="text-space-text-secondary mb-4">
                   Vår snabbaste leveranstjänst som använder avancerad
                   hyperrymdsteknologi för att minimera transporttiden.
@@ -85,7 +85,7 @@ const Services = () => {
                 <div className="bg-space-secondary/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
                   <ShieldCheck className="h-8 w-8 text-space-accent-green" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Säker Transport</h3>
+                <h3 className="text-xl font-medium mb-2">Säker Transport</h3>
                 <p className="text-space-text-secondary mb-4">
                   Specialiserad tjänst för värdefulla, känsliga eller hemliga
                   försändelser som kräver extra säkerhetsåtgärder.
@@ -110,7 +110,7 @@ const Services = () => {
                 <div className="bg-space-secondary/30 p-4 rounded-full w-16 h-16 flex items-center justify-center mb-4">
                   <BarChart3 className="h-8 w-8 text-space-accent-orange" />
                 </div>
-                <h3 className="text-xl font-bold mb-2">Logistiklösningar</h3>
+                <h3 className="text-xl font-medium mb-2">Logistiklösningar</h3>
                 <p className="text-space-text-secondary mb-4">
                   Skräddarsydda supply chain-lösningar för företag med komplexa
                   distributionsbehov i flera solsystem.
@@ -132,7 +132,7 @@ const Services = () => {
               </div>
             </div>
 
-            <h2 className="text-2xl font-bold mb-6">Specialtjänster</h2>
+            <h2 className="text-2xl font-medium mb-6">Specialtjänster</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
               <div className="flex">
@@ -140,7 +140,7 @@ const Services = () => {
                   <Clock className="h-6 w-6 text-space-accent-blue" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold mb-1">
+                  <h3 className="text-lg font-medium mb-1">
                     Tidskänsliga Leveranser
                   </h3>
                   <p className="text-space-text-secondary">
@@ -156,7 +156,9 @@ const Services = () => {
                   <Users className="h-6 w-6 text-space-accent-purple" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold mb-1">Kolonisatörspaket</h3>
+                  <h3 className="text-lg font-medium mb-1">
+                    Kolonisatörspaket
+                  </h3>
                   <p className="text-space-text-secondary">
                     Allt-i-ett-lösning för nya kolonier. Vi levererar allt från
                     basmoduler till livsnödvändiga förnödenheter för att
@@ -167,7 +169,7 @@ const Services = () => {
             </div>
 
             <div className="bg-space-secondary/20 border border-space-accent-blue/30 rounded-lg p-6">
-              <h3 className="text-xl font-bold mb-4 text-space-accent-blue">
+              <h3 className="text-xl font-medium mb-4 text-space-accent-blue">
                 Företagskunder
               </h3>
               <p className="text-space-text-secondary mb-4">
