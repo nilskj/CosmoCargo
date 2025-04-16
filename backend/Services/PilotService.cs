@@ -30,8 +30,8 @@ namespace CosmoCargo.Services
         {
             var activeShipments = await _context.Shipments
                 .CountAsync(s => s.PilotId == pilotId && 
-                               s.Status != ShipmentStatus.Delivered && 
-                               s.Status != ShipmentStatus.LostInBlackHole);
+                                (s.Status == ShipmentStatus.Approved || 
+                                 s.Status == ShipmentStatus.InTransit));
 
             return activeShipments < 3;
         }
@@ -40,8 +40,8 @@ namespace CosmoCargo.Services
         {
             return await _context.Shipments
                 .CountAsync(s => s.PilotId == pilotId && 
-                               s.Status != ShipmentStatus.Delivered && 
-                               s.Status != ShipmentStatus.LostInBlackHole);
+                               (s.Status == ShipmentStatus.Approved || 
+                                 s.Status == ShipmentStatus.InTransit));
         }
     }
 } 

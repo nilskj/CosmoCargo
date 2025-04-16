@@ -79,3 +79,40 @@ Systemet seedar automatiskt databasen med testdata vid första start:
 - Marcus Lindqvist: marcus.lindqvist@cosmocargo.com / pilot123
 - Elsa Berg: elsa.berg@cosmocargo.com / pilot123
 
+## Shipment Status Workflow
+
+The shipment status workflow in the system is as follows:
+
+```mermaid
+stateDiagram-v2
+    [*] --> WaitingForApproval
+    WaitingForApproval --> Approved: Admin approves
+    WaitingForApproval --> Denied: Admin denies
+    Approved --> Assigned: Pilot assigned
+    Assigned --> InTransit: Shipment picked up
+    InTransit --> Delivered: Shipment delivered
+    InTransit --> Cancelled: Shipment cancelled
+    Delivered --> [*]
+    Cancelled --> [*]
+    Denied --> [*]
+```
+
+### Status Flow Details
+
+- **Initial State**: `WaitingForApproval`
+- **Final States**: `Delivered`, `Cancelled`, `Denied`
+- **Role Permissions**:
+  - Only admins can approve/deny shipments
+  - Only pilots can update status to InTransit
+  - Any role can cancel a shipment
+
+### Status Descriptions
+
+- `WaitingForApproval`: Shipment is waiting for admin approval
+- `Approved`: Shipment has been approved by admin
+- `Denied`: Shipment has been denied by admin
+- `Assigned`: Shipment has been assigned to a pilot
+- `InTransit`: Shipment is currently in transit
+- `Delivered`: Shipment has been delivered to its destination
+- `Cancelled`: Shipment has been cancelled
+

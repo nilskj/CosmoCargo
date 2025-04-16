@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using CosmoCargo.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +21,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for managing space cargo shipments"
     });
 
-    // Add JWT Authentication support in Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -57,7 +57,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.LogTo(_ => { }, LogLevel.Warning); // Only log warnings and above
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -109,14 +112,16 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapPost("/api/auth/login", AuthEndpoints.Login);
-app.MapGet("/api/shipments", ShipmentEndpoints.GetAllShipments).RequireAuthorization();
-app.MapGet("/api/shipments/{id}", ShipmentEndpoints.GetShipmentById).RequireAuthorization();
-app.MapPost("/api/shipments", ShipmentEndpoints.CreateShipment).RequireAuthorization(policy => policy.RequireRole("Customer"));
-app.MapPut("/api/shipments/{id}/status", ShipmentEndpoints.UpdateShipmentStatus).RequireAuthorization(policy => policy.RequireRole("Pilot", "Admin"));
-app.MapPut("/api/shipments/{id}/assign", ShipmentEndpoints.AssignPilot).RequireAuthorization(policy => policy.RequireRole("Admin"));
-app.MapGet("/api/pilots", PilotEndpoints.GetAllPilots).RequireAuthorization(policy => policy.RequireRole("Admin"));
-app.MapGet("/api/pilots/{id}", PilotEndpoints.GetPilotById).RequireAuthorization(policy => policy.RequireRole("Admin"));
-app.MapGet("/api/pilots/{id}/availability", PilotEndpoints.GetPilotAvailability).RequireAuthorization(policy => policy.RequireRole("Admin"));
+app.PostAnonymous("/api/auth/login", AuthEndpoints.Login);
+app.Get("/api/shipments", ShipmentEndpoints.GetAllShipments);
+app.Get("/api/shipments/{id}", ShipmentEndpoints.GetShipmentById);
+app.Post("/api/shipments", ShipmentEndpoints.CreateShipment, ["Customer"]);
+app.Put("/api/shipments/{id}/status", ShipmentEndpoints.UpdateShipmentStatus, ["Pilot", "Admin"]);
+app.Put("/api/shipments/{id}/assign", ShipmentEndpoints.AssignPilot, ["Admin"]);
+app.Get("/api/pilots", PilotEndpoints.GetAllPilots, ["Admin"]);
+app.Get("/api/pilots/{id}", PilotEndpoints.GetPilotById, ["Admin"]);
+app.Get("/api/pilots/{id}/availability", PilotEndpoints.GetPilotAvailability, ["Admin"]);
+app.Get("/api/users/me", UserEndpoints.GetMe);
+app.Put("/api/users/me", UserEndpoints.UpdateMe);
 
 app.Run();

@@ -50,8 +50,15 @@ namespace CosmoCargo.Services
             shipment.Id = Guid.NewGuid();
             shipment.CreatedAt = DateTime.UtcNow;
             shipment.UpdatedAt = DateTime.UtcNow;
-            shipment.Status = ShipmentStatus.Pending;
-            shipment.RiskLevel = RiskLevel.Low;
+            shipment.Status = ShipmentStatus.WaitingForApproval;
+            shipment.RiskLevel = shipment.RiskLevel;
+            shipment.Priority = shipment.Priority;
+            shipment.Weight = shipment.Weight;
+            shipment.Cargo = shipment.Cargo;
+            shipment.Origin = shipment.Origin;
+            shipment.Destination = shipment.Destination;
+            shipment.CustomerId = shipment.CustomerId;
+            shipment.PilotId = null;
 
             _context.Shipments.Add(shipment);
             await _context.SaveChangesAsync();

@@ -2,9 +2,12 @@ namespace CosmoCargo.Model
 {
     public enum ShipmentStatus
     {
-        Pending,
-        InProgress,
-        Delivered,
-        LostInBlackHole
+        WaitingForApproval,
+        Approved,
+        Denied,
+        Assigned,
+        InTransit,
+        Delivered
     }
 }
+
