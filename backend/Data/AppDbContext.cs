@@ -1,4 +1,4 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Data
@@ -11,11 +11,9 @@ namespace CosmoCargo.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Shipment> Shipments { get; set; }
-        public DbSet<TollForm> TollForms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Konfigurera relationer
             modelBuilder.Entity<Shipment>()
                 .HasOne(s => s.Customer)
                 .WithMany(u => u.CustomerShipments)
@@ -29,17 +27,10 @@ namespace CosmoCargo.Data
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired(false);
 
-            modelBuilder.Entity<TollForm>()
-                .HasOne(t => t.Shipment)
-                .WithOne(s => s.TollForm)
-                .HasForeignKey<TollForm>(t => t.ShipmentId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
-            // Konfigurera enum-konvertering
             modelBuilder.Entity<Shipment>()
                 .Property(s => s.Status)
                 .HasConversion<string>();
@@ -53,4 +44,4 @@ namespace CosmoCargo.Data
                 .HasConversion<string>();
         }
     }
-} 
+}

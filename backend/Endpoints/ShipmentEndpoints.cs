@@ -1,6 +1,6 @@
-using CosmoCargo.Models;
+using CosmoCargo.Model;
 using CosmoCargo.Services;
-using Microsoft.AspNetCore.Http;
+using CosmoCargo.Utils;
 using System.Security.Claims;
 
 namespace CosmoCargo.Endpoints
@@ -11,32 +11,19 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            // Hämta användarens roll
-            var role = user.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            var userId = user.GetUserId();
 
             IEnumerable<Shipment> shipments;
 
-            // Filtrera frakter baserat på användarens roll
             if (role == UserRole.Admin.ToString())
-            {
-                // Admin ser alla frakter
                 shipments = await shipmentService.GetAllShipmentsAsync();
-            }
             else if (role == UserRole.Pilot.ToString())
-            {
-                // Pilot ser sina tilldelade frakter
                 shipments = await shipmentService.GetShipmentsByPilotIdAsync(userId);
-            }
             else if (role == UserRole.Customer.ToString())
-            {
-                // Kund ser sina egna frakter
                 shipments = await shipmentService.GetShipmentsByCustomerIdAsync(userId);
-            }
             else
-            {
                 return Results.Forbid();
-            }
 
             return Results.Ok(shipments);
         }
@@ -48,29 +35,17 @@ namespace CosmoCargo.Endpoints
         {
             var shipment = await shipmentService.GetShipmentByIdAsync(id);
             if (shipment == null)
-            {
                 return Results.NotFound();
-            }
 
-            // Kontrollera behörighet
-            var role = user.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            var userId = user.GetUserId();
 
             if (role == UserRole.Admin.ToString())
-            {
-                // Admin kan se alla frakter
                 return Results.Ok(shipment);
-            }
             else if (role == UserRole.Pilot.ToString() && shipment.PilotId == userId)
-            {
-                // Pilot kan se sina tilldelade frakter
                 return Results.Ok(shipment);
-            }
             else if (role == UserRole.Customer.ToString() && shipment.CustomerId == userId)
-            {
-                // Kund kan se sina egna frakter
                 return Results.Ok(shipment);
-            }
 
             return Results.Forbid();
         }
@@ -80,7 +55,11 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            if (role == UserRole.Customer.ToString())
+                return Results.Forbid();
+
+            var userId = user.GetUserId();
 
             var shipment = new Shipment
             {
@@ -88,8 +67,9 @@ namespace CosmoCargo.Endpoints
                 Origin = request.Origin,
                 Destination = request.Destination,
                 Weight = request.Weight,
-                Category = request.Category,
-                Priority = request.Priority
+                Cargo = request.Cargo,
+                Priority = request.Priority,
+                ScheduledDate = request.ScheduledDate
             };
 
             var createdShipment = await shipmentService.CreateShipmentAsync(shipment);
@@ -102,27 +82,19 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            // Kontrollera behörighet
-            var role = user.FindFirst(ClaimTypes.Role)?.Value;
-            var userId = Guid.Parse(user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty);
+            var role = user.GetRole();
+            var userId = user.GetUserId();
 
             var shipment = await shipmentService.GetShipmentByIdAsync(id);
             if (shipment == null)
-            {
                 return Results.NotFound();
-            }
 
-            // Piloter kan bara uppdatera sina egna frakter
             if (role == UserRole.Pilot.ToString() && shipment.PilotId != userId)
-            {
                 return Results.Forbid();
-            }
 
             var updatedShipment = await shipmentService.UpdateShipmentStatusAsync(id, request.Status);
             if (updatedShipment == null)
-            {
                 return Results.NotFound();
-            }
 
             return Results.Ok(updatedShipment);
         }
@@ -130,13 +102,16 @@ namespace CosmoCargo.Endpoints
         public static async Task<IResult> AssignPilot(
             Guid id,
             AssignPilotRequest request,
-            IShipmentService shipmentService)
+            IShipmentService shipmentService,
+            ClaimsPrincipal user)
         {
+            var role = user.GetRole();
+            if (role != UserRole.Admin.ToString())
+                return Results.Forbid();
+
             var updatedShipment = await shipmentService.AssignPilotAsync(id, request.PilotId);
             if (updatedShipment == null)
-            {
                 return Results.NotFound();
-            }
 
             return Results.Ok(updatedShipment);
         }
@@ -147,8 +122,9 @@ namespace CosmoCargo.Endpoints
         public string Origin { get; set; } = string.Empty;
         public string Destination { get; set; } = string.Empty;
         public decimal Weight { get; set; }
-        public string Category { get; set; } = string.Empty;
+        public string Cargo { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
+        public DateTime? ScheduledDate { get; set; }
     }
 
     public class UpdateShipmentStatusRequest
