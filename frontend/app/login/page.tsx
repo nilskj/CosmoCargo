@@ -50,7 +50,7 @@ const Login = () => {
       <Header />
 
       <main className="min-h-[calc(100vh-160px)] flex items-center justify-center px-4 py-12">
-        <Card className="space-card w-full max-w-md">
+        <Card className="space-card w-full max-w-md z-50">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl font-medium">
               <Lock className="h-6 w-6 inline-block mr-2 text-space-accent-purple" />
