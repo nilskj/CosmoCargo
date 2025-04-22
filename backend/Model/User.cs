@@ -15,8 +15,8 @@ namespace CosmoCargo.Model
         public DateTime CreatedAt { get; set; }
 
 #region Pilot-specific properties
-        public string Experience { get; set; } = string.Empty;
-        public bool IsActive { get; set; } = true;
+        public string? Experience { get; set; }
+        public bool? IsActive { get; set; }
 #endregion
         
         [JsonIgnore]

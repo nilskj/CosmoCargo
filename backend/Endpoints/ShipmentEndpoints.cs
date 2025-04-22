@@ -69,7 +69,8 @@ namespace CosmoCargo.Endpoints
                 Weight = request.Weight,
                 Cargo = request.Cargo,
                 Priority = request.Priority,
-                ScheduledDate = request.ScheduledDate
+                ScheduledDate = request.ScheduledDate,
+                
             };
 
             var createdShipment = await shipmentService.CreateShipmentAsync(shipment);

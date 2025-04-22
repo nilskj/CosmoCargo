@@ -1,5 +1,6 @@
 using CosmoCargo.Data;
 using CosmoCargo.Model;
+using CosmoCargo.Model.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Services
@@ -29,12 +30,19 @@ namespace CosmoCargo.Services
             if (user == null)
                 return false;
 
-            return VerifyPassword(password, user.PasswordHash);
+            return Utils.Crypto.HashPassword(password) == user.PasswordHash;
         }
 
-        private bool VerifyPassword(string password, string hash)
+        public async Task<User?> UpdateUserAsync(Guid id, string name)
         {
-            return Utils.Crypto.HashPassword(password) == hash;
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+                throw new NotFoundException("User", id.ToString());
+
+            user.Name = name;
+            await _context.SaveChangesAsync();
+
+            return user;
         }
     }
 }
