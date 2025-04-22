@@ -7,6 +7,11 @@ namespace CosmoCargo.Data
 {
     public static class DbInitializer
     {
+        private static int TotalCustomers = Random.Shared.Next(200_000, 300_000);
+        private static int TotalPilots = Random.Shared.Next(100_000, 200_000);
+        private static int TotalAdmins = Random.Shared.Next(50_000, 100_000);
+        private static int TotalShipments = Random.Shared.Next(6_000_000, 8_000_000);
+
         private static readonly Random _random = new Random();
         private static readonly ConcurrentDictionary<string, byte> _takenEmails = new ConcurrentDictionary<string, byte>();
         private const int BatchSize = 100_000;
@@ -97,6 +102,16 @@ namespace CosmoCargo.Data
         {
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            
+            await context.Database.ExecuteSqlRawAsync(@"
+                CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
+                    ""MigrationId"" character varying(150) NOT NULL,
+                    ""ProductVersion"" character varying(32) NOT NULL,
+                    CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
+                );
+            ");
+
+            await context.Database.MigrateAsync();
 
             if (await context.Users.AnyAsync())
                 return;
@@ -168,11 +183,8 @@ namespace CosmoCargo.Data
 
         private static async Task SeedCustomers(IServiceProvider serviceProvider)
         {
-            int totalCustomers = Random.Shared.Next(500_000, 700_000);
-            var batches = (int)Math.Ceiling((double)totalCustomers / BatchSize);
-
-            Log($"Starting to seed {totalCustomers:N0} customers");
-
+            Log($"Starting to seed {TotalCustomers:N0} customers");
+            var batches = (int)Math.Ceiling((double)TotalCustomers / BatchSize);
             var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
             await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
@@ -181,7 +193,7 @@ namespace CosmoCargo.Data
 
                 var customers = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
-                var batchSize = Math.Min(BatchSize, totalCustomers - batch * BatchSize);
+                var batchSize = Math.Min(BatchSize, TotalCustomers - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
@@ -232,7 +244,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalCustomers):N0} customers");
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, TotalCustomers):N0} customers");
             });
 
             Log("Customer seeding completed!");
@@ -245,11 +257,8 @@ namespace CosmoCargo.Data
 
         private static async Task SeedPilots(IServiceProvider serviceProvider)
         {
-            int totalPilots = Random.Shared.Next(300_000, 400_000);
-            var batches = (int)Math.Ceiling((double)totalPilots / BatchSize);
-
-            Log($"Starting to seed {totalPilots:N0} pilots");
-
+            Log($"Starting to seed {TotalPilots:N0} pilots");
+            var batches = (int)Math.Ceiling((double)TotalPilots / BatchSize);
             var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
             await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
@@ -258,7 +267,7 @@ namespace CosmoCargo.Data
 
                 var pilots = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
-                var batchSize = Math.Min(BatchSize, totalPilots - batch * BatchSize);
+                var batchSize = Math.Min(BatchSize, TotalPilots - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
@@ -309,7 +318,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalPilots):N0} pilots");
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, TotalPilots):N0} pilots");
             });
 
             Log("Pilot seeding completed!");
@@ -317,11 +326,8 @@ namespace CosmoCargo.Data
 
         private static async Task SeedAdmins(IServiceProvider serviceProvider)
         {
-            int totalAdmins = Random.Shared.Next(100_000, 200_000);
-            var batches = (int)Math.Ceiling((double)totalAdmins / BatchSize);
-
-            Log($"Starting to seed {totalAdmins:N0} admins");
-
+            Log($"Starting to seed {TotalAdmins:N0} admins");
+            var batches = (int)Math.Ceiling((double)TotalAdmins / BatchSize);
             var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
             await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
@@ -330,7 +336,7 @@ namespace CosmoCargo.Data
 
                 var admins = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
-                var batchSize = Math.Min(BatchSize, totalAdmins - batch * BatchSize);
+                var batchSize = Math.Min(BatchSize, TotalAdmins - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
@@ -381,7 +387,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalAdmins):N0} admins");
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, TotalAdmins):N0} admins");
             });
 
             Log("Admin seeding completed!");
@@ -389,6 +395,8 @@ namespace CosmoCargo.Data
 
         private static async Task SeedShipments(IServiceProvider serviceProvider)
         {
+            Log($"Starting to seed {TotalShipments:N0} shipments");
+
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -405,12 +413,8 @@ namespace CosmoCargo.Data
             var statuses = Enum.GetValues<ShipmentStatus>();
             var riskLevels = Enum.GetValues<RiskLevel>();
             var priorities = new[] { "Low", "Normal", "High", "Urgent" };
-
-            int totalShipments = Random.Shared.Next(12_000_000, 16_000_000);
-            var batches = (int)Math.Ceiling((double)totalShipments / BatchSize);
-
-            Log($"Starting to seed {totalShipments:N0} shipments");
-
+            
+            var batches = (int)Math.Ceiling((double)TotalShipments / BatchSize);
             var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
             await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
@@ -419,7 +423,7 @@ namespace CosmoCargo.Data
 
                 var shipments = new List<Shipment>(BatchSize);
                 var now = DateTime.UtcNow;
-                var batchSize = Math.Min(BatchSize, totalShipments - batch * BatchSize);
+                var batchSize = Math.Min(BatchSize, TotalShipments - batch * BatchSize);
 
                 for (int i = 0; i < batchSize; i++)
                 {
@@ -477,7 +481,7 @@ namespace CosmoCargo.Data
                     }
                 }
 
-                Log($"> Processed {Math.Min((batch + 1) * BatchSize, totalShipments):N0} shipments");
+                Log($"> Processed {Math.Min((batch + 1) * BatchSize, TotalShipments):N0} shipments");
             });
 
             Log("Shipment seeding completed!");
