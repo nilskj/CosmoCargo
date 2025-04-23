@@ -36,7 +36,7 @@ const pilotFormSchema = z.object({
     .min(2, { message: "Pilotens namn måste vara minst 2 tecken." }),
   email: z.string().email({ message: "Vänligen ange en giltig e-postadress." }),
   experience: z.string().min(1, { message: "Vänligen ange erfarenhet." }),
-  isActive: z.boolean().default(true),
+  isActive: z.boolean(),
   password: z
     .string()
     .min(8, { message: "Lösenordet måste vara minst 8 tecken." })
