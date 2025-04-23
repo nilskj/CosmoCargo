@@ -74,9 +74,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 
     if (foundUser) {
-      const { password: _, ...userWithoutPassword } = foundUser;
-      // We need to cast the role to the correct union type since it's coming as string
-      setUser(userWithoutPassword as User);
+      const userWithoutPassword: User = {
+        email: foundUser.email,
+        name: foundUser.name,
+        role: foundUser.role as "customer" | "pilot" | "admin",
+      };
+      setUser(userWithoutPassword);
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(userWithoutPassword));
       toast.success(`Välkommen, ${userWithoutPassword.name}!`);

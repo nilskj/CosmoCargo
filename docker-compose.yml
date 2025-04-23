@@ -1,19 +1,17 @@
-version: '3.8'
-
 services:
   frontend:
     build:
-      context: ../frontend
+      context: ./frontend
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:5000}
-        NODE_ENV: ${NODE_ENV:-development}
+        NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "3000:3000"
     depends_on:
       - backend
     volumes:
-      - ../frontend:/app
+      - ./frontend:/app
       - /app/node_modules
       - /app/.next
     environment:
@@ -22,17 +20,18 @@ services:
 
   backend:
     build:
-      context: ../backend
+      context: ./backend
       dockerfile: Dockerfile
       args:
-        ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+        ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
         CONNECTION_STRING: ${CONNECTION_STRING:-Host=db;Port=5432;Database=cosmocargo;Username=postgres;Password=postgres}
     ports:
       - "5000:5000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
-      - ../backend:/src
+      - ./backend:/src
       - /src/obj
       - /src/bin
 

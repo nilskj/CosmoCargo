@@ -15,7 +15,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import { Lock, User, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";

@@ -21,7 +21,6 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   AlertCircle,
@@ -30,7 +29,6 @@ import {
   UserCheck,
   UserX,
   Edit,
-  Eye,
 } from "lucide-react";
 
 // Mock data for pilots
