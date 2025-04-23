@@ -51,4 +51,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker images
-        run: docker compose -f infrastructure/docker-compose.yml build
+        run: docker compose build
