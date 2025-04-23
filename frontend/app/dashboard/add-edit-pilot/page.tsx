@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
@@ -28,6 +28,7 @@ import { AlertCircle, ArrowLeft, Save } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 
 // Define the form schema with zod
 const pilotFormSchema = z.object({
@@ -80,7 +81,7 @@ type PilotFormValues = z.infer<typeof pilotFormSchema>;
 
 const AddEditPilot = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const { id } = useParams();
   const isEditMode = !!id;
 
@@ -111,10 +112,10 @@ const AddEditPilot = () => {
         });
       } else {
         toast.error("Kunde inte hitta piloten");
-        navigate("/dashboard/pilots");
+        router.push("/dashboard/pilots");
       }
     }
-  }, [id, isEditMode, navigate, form]);
+  }, [id, isEditMode, router, form]);
 
   // Handle form submission
   const onSubmit = (data: PilotFormValues) => {
@@ -128,7 +129,7 @@ const AddEditPilot = () => {
       toast.success(`Piloten ${data.name} har lagts till`);
     }
 
-    navigate("/dashboard/pilots");
+    router.push("/dashboard/pilots");
   };
 
   // Check for admin access
@@ -151,7 +152,7 @@ const AddEditPilot = () => {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate("/dashboard/pilots")}
+          onClick={() => router.push("/dashboard/pilots")}
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Tillbaka
@@ -301,7 +302,7 @@ const AddEditPilot = () => {
                   type="button"
                   variant="outline"
                   className="mr-2"
-                  onClick={() => navigate("/dashboard/pilots")}
+                  onClick={() => router.push("/dashboard/pilots")}
                 >
                   Avbryt
                 </Button>
