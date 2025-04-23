@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import {
   Bell,
   Menu,
-  X,
   User,
   Settings,
   HelpCircle,

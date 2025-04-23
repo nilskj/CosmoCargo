@@ -18,7 +18,7 @@ const useDummyAuth = () => {
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Use the dummy auth instead of the real one until we properly set up auth
-  const { isAuthenticated, user, logout } = useDummyAuth();
+  const { isAuthenticated, logout } = useDummyAuth();
   const router = useRouter();
 
   const handleLoginClick = () => {

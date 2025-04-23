@@ -6,10 +6,8 @@ import {
   Shield,
   Zap,
   Globe,
-  MapPin,
   Package,
   FileText,
-  Clock,
 } from "lucide-react";
 
 interface FeatureProps {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -176,7 +176,7 @@ const AddEditPilot = () => {
                 <FormField
                   control={form.control}
                   name="name"
-                  render={({ field }: { field: any }) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Namn</FormLabel>
                       <FormControl>
@@ -194,7 +194,7 @@ const AddEditPilot = () => {
                 <FormField
                   control={form.control}
                   name="email"
-                  render={({ field }: { field: any }) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>E-post</FormLabel>
                       <FormControl>
@@ -213,7 +213,7 @@ const AddEditPilot = () => {
                 <FormField
                   control={form.control}
                   name="experience"
-                  render={({ field }: { field: any }) => (
+                  render={({ field }) => (
                     <FormItem>
                       <FormLabel>Erfarenhet</FormLabel>
                       <FormControl>
@@ -232,7 +232,7 @@ const AddEditPilot = () => {
                   <FormField
                     control={form.control}
                     name="password"
-                    render={({ field }: { field: any }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>Lösenord</FormLabel>
                         <FormControl>
@@ -254,7 +254,7 @@ const AddEditPilot = () => {
                   <FormField
                     control={form.control}
                     name="password"
-                    render={({ field }: { field: any }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>Nytt Lösenord (valfritt)</FormLabel>
                         <FormControl>
@@ -278,7 +278,7 @@ const AddEditPilot = () => {
               <FormField
                 control={form.control}
                 name="isActive"
-                render={({ field }: { field: any }) => (
+                render={({ field }) => (
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-space-secondary p-4">
                     <FormControl>
                       <Checkbox

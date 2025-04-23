@@ -2,22 +2,7 @@ import * as React from "react";
 import {
   ResponsiveContainer,
   Tooltip,
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Legend,
-  PieChart,
-  Pie,
-  Sector,
-  Cell,
-  AreaChart,
-  Area,
-  RadialBarChart,
-  RadialBar,
   LegendProps,
 } from "recharts";
 
@@ -83,7 +68,7 @@ ChartContainer.displayName = "Chart";
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
-    ([_, config]) => config.theme || config.color
+    ([, config]) => config.theme || config.color
   );
 
   if (!colorConfig.length) {
@@ -296,7 +281,7 @@ const ChartLegendContent = React.forwardRef<
         className
       )}
     >
-      {payload.map((item: any) => {
+      {payload.map((item) => {
         const key = `${nameKey || item.dataKey}`;
         const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
