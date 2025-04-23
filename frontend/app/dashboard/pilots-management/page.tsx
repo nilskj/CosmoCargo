@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Table,
@@ -64,7 +64,7 @@ const MOCK_PILOTS = [
 
 const PilotsManagement = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showSuspendDialog, setShowSuspendDialog] = useState(false);
   const [selectedPilot, setSelectedPilot] = useState<
@@ -96,11 +96,11 @@ const PilotsManagement = () => {
   };
 
   const handleAddPilot = () => {
-    navigate("/dashboard/pilots/add");
+    router.push("/dashboard/pilots/add");
   };
 
   const handleEditPilot = (id: string) => {
-    navigate(`/dashboard/pilots/edit/${id}`);
+    router.push(`/dashboard/pilots/edit/${id}`);
   };
 
   if (user?.role !== "admin") {
