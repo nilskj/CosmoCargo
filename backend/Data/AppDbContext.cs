@@ -26,8 +26,8 @@ namespace CosmoCargo.Data
                 entity.Property(e => e.PasswordHash).IsRequired();
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.Role).IsRequired();
-                entity.Property(e => e.Experience).IsRequired();
-                entity.Property(e => e.IsActive).IsRequired();
+                entity.Property(e => e.Experience);
+                entity.Property(e => e.IsActive);
                 entity.HasIndex(e => e.Email).IsUnique();
 
                 entity.HasMany(u => u.CustomerShipments)

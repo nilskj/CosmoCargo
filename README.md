@@ -23,48 +23,28 @@
 
 ### Infrastruktur
 - Docker Compose
-- Infrastructure as Code (IaC)
 
-## 🚀 Kom igång
+## 🚀 Utveckling
 
 ### Förutsättningar
 - Docker och Docker Compose
-- Node.js (v18+)
-- .NET SDK 8.0+
+- Node.js (v22+)
+- .NET SDK 9
 
 ### Installation
 
-1. Klona repositoryt:
+1. Starta hela applikationen med Docker Compose:
 ```bash
-git clone https://github.com/ditt-användarnamn/cosmocargo.git
-cd cosmocargo
+docker compose watch
 ```
 
-2. Starta hela applikationen med Docker Compose:
-```bash
-docker compose up -d
-```
+2. Vänta på seedningen av databasen (endast första gången):
+   - Se logg för `cosmocargo-backend-1` containern
 
 3. Applikationen är nu tillgänglig på:
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5000
 
-## 🧪 Utveckling
-
-### Köra frontend separat
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-### Köra backend separat
-```bash
-docker compose up db -d
-cd backend
-dotnet restore
-dotnet run
-```
 
 ### Köra tester
 ```bash

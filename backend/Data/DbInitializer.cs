@@ -14,6 +14,9 @@ namespace CosmoCargo.Data
 
         private static readonly Random _random = new Random();
         private static readonly ConcurrentDictionary<string, byte> _takenEmails = new ConcurrentDictionary<string, byte>();
+        private static Guid DemoCustomerId;
+        private static Guid DemoPilotId;
+        private static Guid DemoAdminId;
         private const int BatchSize = 100_000;
         private const int MaxRetries = 5;
         private const int MaxDegreeOfParallelism = 5;
@@ -103,6 +106,7 @@ namespace CosmoCargo.Data
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             
+            // Apply migrations
             await context.Database.ExecuteSqlRawAsync(@"
                 CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
                     ""MigrationId"" character varying(150) NOT NULL,
@@ -110,7 +114,6 @@ namespace CosmoCargo.Data
                     CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
                 );
             ");
-
             await context.Database.MigrateAsync();
 
             if (await context.Users.AnyAsync())
@@ -118,6 +121,7 @@ namespace CosmoCargo.Data
 
             Log("DATABASE: Start seeding");
 
+            await SeedDemoUsers(serviceProvider);
             await SeedCustomers(serviceProvider);
             await SeedPilots(serviceProvider);
             await SeedAdmins(serviceProvider);
@@ -179,6 +183,60 @@ namespace CosmoCargo.Data
             }
 
             await writer.CompleteAsync();
+        }
+
+        private static async Task SeedDemoUsers(IServiceProvider serviceProvider)
+        {
+            Log("Starting to seed demo customers");
+
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            DemoCustomerId = Guid.NewGuid();
+            DemoPilotId = Guid.NewGuid();
+            DemoAdminId = Guid.NewGuid();
+
+            var demoUsers = new List<User>
+            {
+                new User
+                {
+                    Id = DemoCustomerId,
+                    Name = "Demo Customer",
+                    Email = GenerateUniqueEmail("demo", "customer", "example.com"),
+                    PasswordHash = Utils.Crypto.HashPassword("mKv2P8dXrL9F"),
+                    Role = UserRole.Customer,
+                    Experience = null,
+                    IsActive = null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                },
+                new User
+                {
+                    Id = DemoPilotId,
+                    Name = "Demo Pilot",
+                    Email = GenerateUniqueEmail("demo", "pilot", "example.com"),
+                    PasswordHash = Utils.Crypto.HashPassword("zH7yB3tR5wQ9s"),
+                    Role = UserRole.Pilot,
+                    Experience = null,
+                    IsActive = null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                },
+                new User
+                {
+                    Id = DemoAdminId,
+                    Name = "Demo Admin",
+                    Email = GenerateUniqueEmail("demo", "admin", "example.com"),
+                    PasswordHash = Utils.Crypto.HashPassword("eT4xD6cV2gN8p"),
+                    Role = UserRole.Admin,
+                    Experience = null,
+                    IsActive = null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                },
+            };
+
+            await context.Users.AddRangeAsync(demoUsers);
+            await context.SaveChangesAsync();
+
+            Log("Demo customers seeded!");
         }
 
         private static async Task SeedCustomers(IServiceProvider serviceProvider)
@@ -435,10 +493,10 @@ namespace CosmoCargo.Data
                     shipments.Add(new Shipment
                     {
                         Id = Guid.NewGuid(),
-                        CustomerId = customerIds[_random.Next(customerIds.Count)],
+                        CustomerId = Random.Shared.Next(100) < 5 ? DemoCustomerId : customerIds[_random.Next(customerIds.Count)],
                         PilotId = status == ShipmentStatus.Assigned 
                             || status == ShipmentStatus.InTransit 
-                            || status == ShipmentStatus.Delivered ? pilotIds[_random.Next(pilotIds.Count)] : null,
+                            || status == ShipmentStatus.Delivered ? (Random.Shared.Next(100) < 5 ? DemoPilotId : pilotIds[_random.Next(pilotIds.Count)]) : null,
                         Origin = _origins[_random.Next(_origins.Length)],
                         Destination = _destinations[_random.Next(_destinations.Length)],
                         Weight = _random.Next(50, 1000),

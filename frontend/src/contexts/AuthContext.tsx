@@ -3,28 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-// Hardcoded credentials for mock authentication with random passwords
-const MOCK_USERS = [
-  {
-    email: "user@example.com",
-    password: "mKv2P8dXrL9F",
-    name: "Johan Andersson",
-    role: "customer",
-  },
-  {
-    email: "pilot@example.com",
-    password: "zH7yB3tR5wQ9s",
-    name: "Erik Nilsson",
-    role: "pilot",
-  },
-  {
-    email: "admin@example.com",
-    password: "eT4xD6cV2gN8p",
-    name: "Maria Johansson",
-    role: "admin",
-  },
-];
+import { api } from "../services/api";
 
 interface User {
   email: string;
@@ -65,29 +44,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const foundUser = MOCK_USERS.find(
-      (u) =>
-        u.email.toLowerCase() === email.toLowerCase() && u.password === password
-    );
-
-    if (foundUser) {
-      const userWithoutPassword: User = {
-        email: foundUser.email,
-        name: foundUser.name,
-        role: foundUser.role as "customer" | "pilot" | "admin",
-      };
-      setUser(userWithoutPassword);
+    try {
+      const loginResponse = await api.post<{ message: string }>('/auth/login', { email, password });
+      if (!loginResponse.ok) {
+        throw new Error('Login failed');
+      }
+      
+      const userResponse = await api.get<User>('/users/me');
+      if (!userResponse.ok) {
+        throw new Error('Failed to fetch user data');
+      }
+      
+      const user = userResponse.data;
+      setUser(user);
       setIsAuthenticated(true);
-      localStorage.setItem("user", JSON.stringify(userWithoutPassword));
-      toast.success(`Välkommen, ${userWithoutPassword.name}!`);
+      localStorage.setItem("user", JSON.stringify(user));
+      toast.success(`Välkommen, ${user.name}!`);
       return true;
+    } catch {
+      toast.error("Felaktiga inloggningsuppgifter");
+      return false;
     }
-
-    toast.error("Felaktiga inloggningsuppgifter");
-    return false;
   };
 
   const logout = () => {

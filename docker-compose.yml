@@ -10,13 +10,10 @@ services:
       - "3000:3000"
     depends_on:
       - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
-    environment:
-      - DOCKER_CLIENT_TIMEOUT=120
-      - COMPOSE_HTTP_TIMEOUT=120
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend
 
   backend:
     build:
@@ -34,6 +31,15 @@ services:
       - ./backend:/src
       - /src/obj
       - /src/bin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/healthcheck/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend
 
   db:
     image: postgres:15
@@ -65,4 +71,4 @@ services:
 
 volumes:
   postgres_data:
-  pgadmin_data: 
+  pgadmin_data:

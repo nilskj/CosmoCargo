@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using CosmoCargo.Utils;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,9 +57,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:3000")
+        policy.WithOrigins(["http://localhost:3000", "http://localhost:3001"])
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -83,6 +85,17 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "CosmoCargo.Auth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
+    });
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -91,13 +104,8 @@ builder.Services.AddScoped<IPilotService, PilotService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
-
-app.UseHttpsRedirection();
+app.MapOpenApi();
+app.MapScalarApiReference();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -117,6 +125,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.GetAnonymous("/api/healthcheck/ping", HealthcheckEndpoints.Ping);
 app.PostAnonymous("/api/auth/login", AuthEndpoints.Login);
 app.Get("/api/shipments", ShipmentEndpoints.GetAllShipments);
 app.Get("/api/shipments/{id}", ShipmentEndpoints.GetShipmentById);

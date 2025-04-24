@@ -139,11 +139,11 @@ const Login = () => {
                   <strong>Demo inloggningsuppgifter:</strong>
                 </p>
                 <p className="text-xs mt-1 text-space-text-secondary">
-                  Kund: user@example.com / mKv2P8dXrL9F
+                  Kund: demo.customer@example.com / mKv2P8dXrL9F
                   <br />
-                  Pilot: pilot@example.com / zH7yB3tR5wQ9s
+                  Pilot: demo.pilot@example.com / zH7yB3tR5wQ9s
                   <br />
-                  Admin: admin@example.com / eT4xD6cV2gN8p
+                  Admin: demo.admin@example.com / eT4xD6cV2gN8p
                 </p>
               </div>
             </form>

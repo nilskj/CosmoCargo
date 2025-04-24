@@ -108,11 +108,10 @@ namespace CosmoCargo.Migrations
                         .HasColumnName("email");
 
                     b.Property<string>("Experience")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("experience");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool?>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 
