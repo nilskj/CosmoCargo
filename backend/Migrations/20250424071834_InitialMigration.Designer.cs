@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CosmoCargo.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250416131112_InitialMigration")]
+    [Migration("20250424071834_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -111,11 +111,10 @@ namespace CosmoCargo.Migrations
                         .HasColumnName("email");
 
                     b.Property<string>("Experience")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("experience");
 
-                    b.Property<bool>("IsActive")
+                    b.Property<bool?>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");
 

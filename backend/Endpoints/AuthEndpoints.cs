@@ -12,16 +12,13 @@ namespace CosmoCargo.Endpoints
             IUserService userService,
             HttpContext context)
         {
-            Console.WriteLine($"Login request received: {request.Email + " " + request.Password}");
             if (!await userService.ValidateUserCredentialsAsync(request.Email, request.Password))
                 return Results.Unauthorized();
 
-            Console.WriteLine("Auth passed");
             var user = await userService.GetUserByEmailAsync(request.Email);
             if (user == null)
                 return Results.Unauthorized();
 
-            Console.WriteLine("User found");
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -42,8 +39,6 @@ namespace CosmoCargo.Endpoints
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
-
-            Console.WriteLine("Signed in");
 
             return Results.Ok("");
         }

@@ -103,6 +103,7 @@ namespace CosmoCargo.Data
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             
+            // Apply migrations
             await context.Database.ExecuteSqlRawAsync(@"
                 CREATE TABLE IF NOT EXISTS ""__EFMigrationsHistory"" (
                     ""MigrationId"" character varying(150) NOT NULL,
@@ -110,7 +111,6 @@ namespace CosmoCargo.Data
                     CONSTRAINT ""PK___EFMigrationsHistory"" PRIMARY KEY (""MigrationId"")
                 );
             ");
-
             await context.Database.MigrateAsync();
 
             if (await context.Users.AnyAsync())
@@ -184,6 +184,8 @@ namespace CosmoCargo.Data
 
         private static async Task SeedDemoUsers(IServiceProvider serviceProvider)
         {
+            Log("Starting to seed demo customers");
+
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -226,6 +228,8 @@ namespace CosmoCargo.Data
 
             await context.Users.AddRangeAsync(demoUsers);
             await context.SaveChangesAsync();
+
+            Log("Demo customers seeded!");
         }
 
         private static async Task SeedCustomers(IServiceProvider serviceProvider)

@@ -35,6 +35,11 @@ services:
       - ./backend:/src
       - /src/obj
       - /src/bin
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/healthcheck/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     develop:
       watch:
         - action: rebuild

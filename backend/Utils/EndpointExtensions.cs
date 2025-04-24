@@ -51,5 +51,10 @@ namespace CosmoCargo.Utils
         {
             app.MapPost(pattern, handler);
         }
+
+        public static void GetAnonymous(this WebApplication app, [StringSyntax("Route")] string pattern, Delegate handler)
+        {
+            app.MapGet(pattern, handler);
+        }
     }
 }
