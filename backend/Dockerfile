@@ -28,8 +28,9 @@ COPY --from=build /app/publish .
 # Set environment variables in runtime stage
 ENV ASPNETCORE_ENVIRONMENT=$ASPNETCORE_ENVIRONMENT
 ENV ConnectionStrings__DefaultConnection=$CONNECTION_STRING
+ENV ASPNETCORE_URLS=http://+:5000
+ENV ASPNETCORE_HTTP_PORTS=5000
 
 ENTRYPOINT ["dotnet", "CosmoCargo.dll"]
 
 EXPOSE 5000
-ENV ASPNETCORE_URLS=http://+:5000

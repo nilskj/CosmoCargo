@@ -1,9 +1,7 @@
-using CosmoCargo.Model;
 using CosmoCargo.Services;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using System.Text;
 
 namespace CosmoCargo.Endpoints
 {
@@ -12,44 +10,42 @@ namespace CosmoCargo.Endpoints
         public static async Task<IResult> Login(
             LoginRequest request,
             IUserService userService,
-            IConfiguration configuration)
+            HttpContext context)
         {
+            Console.WriteLine($"Login request received: {request.Email + " " + request.Password}");
             if (!await userService.ValidateUserCredentialsAsync(request.Email, request.Password))
                 return Results.Unauthorized();
 
+            Console.WriteLine("Auth passed");
             var user = await userService.GetUserByEmailAsync(request.Email);
             if (user == null)
                 return Results.Unauthorized();
 
-            var token = GenerateJwtToken(user, configuration);
-            return Results.Ok(new { Token = token, User = user });
-        }
-
-        private static string GenerateJwtToken(User user, IConfiguration configuration)
-        {
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                configuration["Jwt:Key"] ?? "defaultDevKeyThatShouldBeReplaced"));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddMinutes(Convert.ToDouble(
-                configuration["Jwt:ExpiryMinutes"] ?? "60"));
-
-            var claims = new[]
+            Console.WriteLine("User found");
+            var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.ToString())
             };
 
-            var token = new JwtSecurityToken(
-                configuration["Jwt:Issuer"],
-                configuration["Jwt:Audience"],
-                claims,
-                expires: expires,
-                signingCredentials: creds
-            );
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7),
+                AllowRefresh = true
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            await context.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity),
+                authProperties);
+
+            Console.WriteLine("Signed in");
+
+            return Results.Ok("");
         }
     }
 

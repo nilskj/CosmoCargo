@@ -118,6 +118,7 @@ namespace CosmoCargo.Data
 
             Log("DATABASE: Start seeding");
 
+            await SeedDemoUsers(serviceProvider);
             await SeedCustomers(serviceProvider);
             await SeedPilots(serviceProvider);
             await SeedAdmins(serviceProvider);
@@ -179,6 +180,52 @@ namespace CosmoCargo.Data
             }
 
             await writer.CompleteAsync();
+        }
+
+        private static async Task SeedDemoUsers(IServiceProvider serviceProvider)
+        {
+            using var scope = serviceProvider.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var demoUsers = new List<User>
+            {
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Demo Customer",
+                    Email = GenerateUniqueEmail("demo", "customer", "example.com"),
+                    PasswordHash = Utils.Crypto.HashPassword("mKv2P8dXrL9F"),
+                    Role = UserRole.Customer,
+                    Experience = null,
+                    IsActive = null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Demo Pilot",
+                    Email = GenerateUniqueEmail("pilot", "demo", "example.com"),
+                    PasswordHash = Utils.Crypto.HashPassword("zH7yB3tR5wQ9s"),
+                    Role = UserRole.Pilot,
+                    Experience = null,
+                    IsActive = null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Demo Admin",
+                    Email = GenerateUniqueEmail("admin", "demo", "example.com"),
+                    PasswordHash = Utils.Crypto.HashPassword("eT4xD6cV2gN8p"),
+                    Role = UserRole.Admin,
+                    Experience = null,
+                    IsActive = null,
+                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                },
+            };
+
+            await context.Users.AddRangeAsync(demoUsers);
+            await context.SaveChangesAsync();
         }
 
         private static async Task SeedCustomers(IServiceProvider serviceProvider)

@@ -27,6 +27,7 @@ namespace CosmoCargo.Services
         public async Task<bool> ValidateUserCredentialsAsync(string email, string password)
         {
             var user = await GetUserByEmailAsync(email);
+            Console.WriteLine($"User: {user?.Name}");
             if (user == null)
                 return false;
 
