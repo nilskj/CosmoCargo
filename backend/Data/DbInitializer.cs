@@ -206,7 +206,7 @@ namespace CosmoCargo.Data
                 {
                     Id = Guid.NewGuid(),
                     Name = "Demo Pilot",
-                    Email = GenerateUniqueEmail("pilot", "demo", "example.com"),
+                    Email = GenerateUniqueEmail("demo", "pilot", "example.com"),
                     PasswordHash = Utils.Crypto.HashPassword("zH7yB3tR5wQ9s"),
                     Role = UserRole.Pilot,
                     Experience = null,
@@ -217,7 +217,7 @@ namespace CosmoCargo.Data
                 {
                     Id = Guid.NewGuid(),
                     Name = "Demo Admin",
-                    Email = GenerateUniqueEmail("admin", "demo", "example.com"),
+                    Email = GenerateUniqueEmail("demo", "admin", "example.com"),
                     PasswordHash = Utils.Crypto.HashPassword("eT4xD6cV2gN8p"),
                     Role = UserRole.Admin,
                     Experience = null,
