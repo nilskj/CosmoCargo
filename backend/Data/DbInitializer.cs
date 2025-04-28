@@ -17,90 +17,90 @@ namespace CosmoCargo.Data
         private static Guid DemoPilotId;
         private static Guid DemoAdminId;
         private const int BatchSize = 100_000;
-        private const int MaxRetries = 5;
-        private const int MaxDegreeOfParallelism = 5;
-        private const int DeadlockRetryDelay = 2000;
-        private static readonly string[] _origins = new[]
-        {
-            "Earth, Stockholm Station",
-            "Earth, Gothenburg Station",
-            "Earth, Malmö Station",
-            "Earth, Alpha Station",
-            "Earth, Beta Station",
-            "Earth, Gamma Station",
-            "Mars, Olympus Station",
-            "Mars, Base One",
-            "Moon, Colony Alpha",
-            "Titan, Research Station",
-            "Europa, Ice Harbor",
-            "Ganymede, Outpost",
-            "Callisto, Mining Facility",
-            "Io, Research Base",
-            "Enceladus, Station"
-        };
+        private const int MaxRetries = 3;
+        private const int MaxDegreeOfParallelism = 4;
+        private const int DeadlockRetryDelay = 1000;
+        private static readonly string[] _origins =
+        [
+            "Earth,Stockholm Station",
+            "Earth,Gothenburg Station",
+            "Earth,Malmö Station",
+            "Earth,Alpha Station",
+            "Earth,Beta Station",
+            "Earth,Gamma Station",
+            "Mars,Olympus Station",
+            "Mars,Base One",
+            "Moon,Colony Alpha",
+            "Titan,Research Station",
+            "Europa,Ice Harbor",
+            "Ganymede,Outpost",
+            "Callisto,Mining Facility",
+            "Io,Research Base",
+            "Enceladus,Station"
+        ];
 
-        private static readonly string[] _destinations = new[]
-        {
-            "Mars, Olympus Station",
-            "Mars, Base One",
-            "Moon, Colony Alpha",
-            "Titan, Research Station",
-            "Europa, Ice Harbor",
-            "Ganymede, Outpost",
-            "Callisto, Mining Facility",
-            "Io, Research Base",
-            "Enceladus, Station",
-            "Triton, Research Base",
-            "Pluto, Station",
-            "Charon, Outpost",
-            "Ceres, Mining Facility",
-            "Vesta, Research Station",
-            "Pallas, Colony"
-        };
+        private static readonly string[] _destinations =
+        [
+            "Mars,Olympus Station",
+            "Mars,Base One",
+            "Moon,Colony Alpha",
+            "Titan,Research Station",
+            "Europa,Ice Harbor",
+            "Ganymede,Outpost",
+            "Callisto,Mining Facility",
+            "Io,Research Base",
+            "Enceladus,Station",
+            "Triton,Research Base",
+            "Pluto,Station",
+            "Charon,Outpost",
+            "Ceres,Mining Facility",
+            "Vesta,Research Station",
+            "Pallas,Colony"
+        ];
 
-        private static readonly string[] _categories = new[]
-        {
+        private static readonly string[] _categories =
+        [
             "Scientific Equipment", "Medical Supplies", "Construction Materials",
             "Food Supplies", "Mining Equipment", "Research Samples",
             "Spare Parts", "Personal Effects", "Industrial Machinery",
             "Water Supplies", "Oxygen Tanks", "Fuel Cells",
             "Electronics", "Raw Materials", "Agricultural Products"
-        };
+        ];
 
-        private static readonly string[] _priorities = new[] { "Low", "Normal", "High", "Urgent" };
+        private static readonly string[] _priorities = ["Low", "Normal", "High", "Urgent"];
 
-        private static readonly string[] _firstNames = new[]
-        {
+        private static readonly string[] _firstNames =
+        [
             "Erik", "Anna", "Maria", "Johan", "Anders", "Karin", "Lars", "Sofia",
             "Mikael", "Emma", "Per", "Lisa", "Karl", "Eva", "Peter", "Linda",
             "Andreas", "Sara", "Thomas", "Jenny", "Daniel", "Maria", "Fredrik",
             "Emma", "Magnus", "Anna", "Jonas", "Sofia", "Martin", "Karin"
-        };
+        ];
 
-        private static readonly string[] _lastNames = new[]
-        {
+        private static readonly string[] _lastNames =
+        [
             "Andersson", "Johansson", "Karlsson", "Nilsson", "Eriksson", "Larsson",
             "Olsson", "Persson", "Svensson", "Gustafsson", "Pettersson", "Jonsson",
             "Jansson", "Hansson", "Bengtsson", "Jönsson", "Lindberg", "Jakobsson",
             "Magnusson", "Olofsson", "Lindström", "Lindqvist", "Lindgren", "Axelsson",
             "Berg", "Bergström", "Lundberg", "Lundgren", "Lundqvist", "Mattsson"
-        };
+        ];
 
-        private static readonly string[] _experienceLevels = new[]
-        {
+        private static readonly string[] _experienceLevels =
+        [
             "1 year", "2 years", "3 years", "4 years", "5 years", "6 years",
             "7 years", "8 years", "9 years", "10 years", "11 years", "12 years",
             "13 years", "14 years", "15 years", "16 years", "17 years", "18 years",
             "19 years", "20 years"
-        };
+        ];
 
-        private static readonly string[] _industries = new[]
-        {
+        private static readonly string[] _industries =
+        [
             "logistics", "space transport", "interplanetary shipping", "cargo management",
             "space logistics", "freight forwarding", "supply chain", "transportation",
             "space operations", "cargo operations", "shipping management", "space navigation",
             "cargo handling", "space logistics management", "interplanetary operations"
-        };
+        ];
 
         private static string GenerateUniqueEmail(string firstName, string lastName, string domain)
         {
@@ -176,11 +176,15 @@ namespace CosmoCargo.Data
             await writer.CompleteAsync();
         }
 
-        private static async Task BulkInsertShipmentsAsync(AppDbContext context, List<Shipment> shipments)
+        private static async Task BulkInsertShipmentsAsync(AppDbContext context, Shipment[] shipments)
         {
             var connection = (NpgsqlConnection)context.Database.GetDbConnection();
             if (connection.State != System.Data.ConnectionState.Open)
                 await connection.OpenAsync();
+
+            // Set optimal settings for bulk copy
+            await using var cmd = new NpgsqlCommand("SET synchronous_commit TO OFF", connection);
+            await cmd.ExecuteNonQueryAsync();
 
             using var writer = await connection.BeginBinaryImportAsync(
                 "COPY shipments (id, customer_id, pilot_id, sender_name, sender_email, sender_planet, sender_station, receiver_name, receiver_email, receiver_planet, receiver_station, weight, category, priority, description, has_insurance, status, created_at, updated_at) FROM STDIN (FORMAT BINARY)");
@@ -490,6 +494,7 @@ namespace CosmoCargo.Data
             using var scope = serviceProvider.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
+            // Pre-fetch all IDs in a single query and cache them
             var customerIds = await context.Users
                 .Where(u => u.Role == UserRole.Customer)
                 .Select(u => u.Id)
@@ -502,17 +507,33 @@ namespace CosmoCargo.Data
 
             var statuses = Enum.GetValues<ShipmentStatus>();
             
+            // Pre-calculate all possible combinations to avoid repeated calculations
+            var origins = _origins.Select(o => o.Split(',')).ToArray();
+            var destinations = _destinations.Select(d => d.Split(',')).ToArray();
+            var nameCombinations = _firstNames.SelectMany(f => _lastNames.Select(l => $"{f} {l}")).ToArray();
+            
+            // Pre-generate all possible weights, categories, and priorities
+            var weights = Enumerable.Range(50, 951).Select(w => (decimal)w).ToArray();
+            var categories = _categories.ToArray();
+            var priorities = _priorities.ToArray();
+            
             var batches = (int)Math.Ceiling((double)TotalShipments / BatchSize);
             var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
+            
             await Parallel.ForEachAsync(Enumerable.Range(0, batches), options, async (batch, ct) =>
             {
                 using var scope = serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                var random = new Random(Environment.TickCount + batch * 1000); // Create a new Random instance for each batch
+                var random = new Random(Environment.TickCount + batch * 1000);
 
-                var shipments = new List<Shipment>(BatchSize);
-                var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalShipments - batch * BatchSize);
+                var shipments = new Shipment[batchSize];
+                var now = DateTime.UtcNow;
+
+                // Pre-generate all random data for the batch
+                var randomData = new (int originIndex, int destIndex, int senderNameIndex, int receiverNameIndex, 
+                                    int weightIndex, int categoryIndex, int priorityIndex, bool hasInsurance,
+                                    ShipmentStatus status, DateTime createdAt, DateTime updatedAt)[batchSize];
 
                 for (int i = 0; i < batchSize; i++)
                 {
@@ -521,44 +542,60 @@ namespace CosmoCargo.Data
                     var updatedAt = createdAt.AddDays(random.Next(0, 30));
                     var status = statuses[random.Next(statuses.Length)];
 
-                    shipments.Add(new Shipment
+                    randomData[i] = (
+                        random.Next(origins.Length),
+                        random.Next(destinations.Length),
+                        random.Next(nameCombinations.Length),
+                        random.Next(nameCombinations.Length),
+                        random.Next(weights.Length),
+                        random.Next(categories.Length),
+                        random.Next(priorities.Length),
+                        random.Next(100) < 70,
+                        status,
+                        createdAt,
+                        updatedAt
+                    );
+                }
+
+                // Create shipments using pre-generated data
+                var senderContact = new ShipmentContact();
+                var receiverContact = new ShipmentContact();
+
+                for (int i = 0; i < batchSize; i++)
+                {
+                    var data = randomData[i];
+                    var origin = origins[data.originIndex];
+                    var destination = destinations[data.destIndex];
+
+                    // Reuse the same contact objects
+                    senderContact.Name = nameCombinations[data.senderNameIndex];
+                    senderContact.Email = "sender.shipment@example.com";
+                    senderContact.Planet = origin[0];
+                    senderContact.Station = origin[1];
+
+                    receiverContact.Name = nameCombinations[data.receiverNameIndex];
+                    receiverContact.Email = "receiver.shipment@example.com";
+                    receiverContact.Planet = destination[0];
+                    receiverContact.Station = destination[1];
+
+                    shipments[i] = new Shipment
                     {
                         Id = Guid.NewGuid(),
                         CustomerId = random.Next(100) < 5 ? DemoCustomerId : customerIds[random.Next(customerIds.Count)],
-                        PilotId = status == ShipmentStatus.Assigned 
-                            || status == ShipmentStatus.InTransit 
-                            || status == ShipmentStatus.Delivered ? (random.Next(100) < 5 ? DemoPilotId : pilotIds[random.Next(pilotIds.Count)]) : null,
-                        
-                        // Sender information
-                        Sender = new ShipmentContact
-                        {
-                            Name = $"{_firstNames[random.Next(_firstNames.Length)]} {_lastNames[random.Next(_lastNames.Length)]}",
-                            Email = GenerateUniqueEmail("sender", "shipment", "example.com"),
-                            Planet = _origins[random.Next(_origins.Length)].Split(',')[0].Trim(),
-                            Station = _origins[random.Next(_origins.Length)].Split(',')[1].Trim()
-                        },
-                        
-                        // Receiver information
-                        Receiver = new ShipmentContact
-                        {
-                            Name = $"{_firstNames[random.Next(_firstNames.Length)]} {_lastNames[random.Next(_lastNames.Length)]}",
-                            Email = GenerateUniqueEmail("receiver", "shipment", "example.com"),
-                            Planet = _destinations[random.Next(_destinations.Length)].Split(',')[0].Trim(),
-                            Station = _destinations[random.Next(_destinations.Length)].Split(',')[1].Trim()
-                        },
-                        
-                        // Package information
-                        Weight = random.Next(50, 1000),
-                        Category = _categories[random.Next(_categories.Length)],
-                        Priority = _priorities[random.Next(_priorities.Length)],
-                        Description = $"Sample shipment #{i + 1}",
-                        HasInsurance = random.Next(100) < 70, // 70% chance of having insurance
-                        
-                        // Status and tracking
-                        Status = status,
-                        CreatedAt = createdAt,
-                        UpdatedAt = updatedAt
-                    });
+                        PilotId = data.status == ShipmentStatus.Assigned 
+                            || data.status == ShipmentStatus.InTransit 
+                            || data.status == ShipmentStatus.Delivered ? (random.Next(100) < 5 ? DemoPilotId : pilotIds[random.Next(pilotIds.Count)]) : null,
+                        Sender = senderContact,
+                        Receiver = receiverContact,
+                        Weight = weights[data.weightIndex],
+                        Category = categories[data.categoryIndex],
+                        Priority = priorities[data.priorityIndex],
+                        Description = "Sample shipment",
+                        HasInsurance = data.hasInsurance,
+                        Status = data.status,
+                        CreatedAt = data.createdAt,
+                        UpdatedAt = data.updatedAt
+                    };
                 }
 
                 for (int retry = 0; retry < MaxRetries; retry++)
