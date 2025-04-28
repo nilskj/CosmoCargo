@@ -164,36 +164,6 @@ const BookShipment = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="package-dimensions">Dimensioner (cm) *</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Input
-                      id="package-length"
-                      type="number"
-                      min="1"
-                      placeholder="Längd"
-                      className="space-input"
-                      required
-                    />
-                    <Input
-                      id="package-width"
-                      type="number"
-                      min="1"
-                      placeholder="Bredd"
-                      className="space-input"
-                      required
-                    />
-                    <Input
-                      id="package-height"
-                      type="number"
-                      min="1"
-                      placeholder="Höjd"
-                      className="space-input"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="package-type">Kategori *</Label>
                   <select
                     id="package-type"
