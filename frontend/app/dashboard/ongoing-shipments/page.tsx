@@ -8,7 +8,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Package, Search, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery } from "@tanstack/react-query";
@@ -90,9 +90,13 @@ const OngoingShipments = () => {
             onChange={handleStatusChange}
           >
             <option value="">Alla statusar</option>
+            <option value={ShipmentStatus.WaitingForApproval}>Väntar på godkännande</option>
+            <option value={ShipmentStatus.Approved}>Godkänd</option>
+            <option value={ShipmentStatus.Denied}>Nekad</option>
             <option value={ShipmentStatus.Assigned}>Tilldelad</option>
-            <option value={ShipmentStatus.InTransit}>I transit</option>
+            <option value={ShipmentStatus.InTransit}>Under transport</option>
             <option value={ShipmentStatus.Delivered}>Levererad</option>
+            <option value={ShipmentStatus.Cancelled}>Avbruten</option>
           </select>
 
           <select
@@ -122,7 +126,7 @@ const OngoingShipments = () => {
                     Frakt #{shipment.id}
                   </CardTitle>
                   <CardDescription>
-                    {shipment.sender.planet} → {shipment.receiver.planet}
+                    {shipment.sender.station + ' @ ' + shipment.sender.planet} → {shipment.receiver.station + ' @ ' + shipment.receiver.planet}
                   </CardDescription>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColorClass(shipment.status)}`}>
