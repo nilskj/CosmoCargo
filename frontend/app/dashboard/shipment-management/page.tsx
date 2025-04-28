@@ -35,71 +35,18 @@ import {
   XCircle,
   Plane,
 } from "lucide-react";
-
-// Mock data for shipments
-const MOCK_SHIPMENTS = [
-  {
-    id: "SHIP-1001",
-    customer: "Johan Andersson",
-    origin: "Stockholm, Sweden",
-    destination: "Lunar Colony Alpha",
-    scheduledDate: "2025-04-25",
-    status: "pending_approval",
-    cargo: "Scientific Equipment",
-    weight: "250kg",
-    pilot: null,
-  },
-  {
-    id: "SHIP-1002",
-    customer: "Maria Johansson",
-    origin: "Gothenburg, Sweden",
-    destination: "Mars Base One",
-    scheduledDate: "2025-04-28",
-    status: "approved",
-    cargo: "Medical Supplies",
-    weight: "180kg",
-    pilot: null,
-  },
-  {
-    id: "SHIP-1003",
-    customer: "Erik Nilsson",
-    origin: "Malmö, Sweden",
-    destination: "Titan Research Station",
-    scheduledDate: "2025-05-02",
-    status: "assigned",
-    cargo: "Construction Materials",
-    weight: "500kg",
-    pilot: "Lars Svensson",
-  },
-];
-
-// Mock data for pilots
-const MOCK_PILOTS = [
-  { id: "P1001", name: "Erik Nilsson", available: true },
-  { id: "P1002", name: "Anna Lindberg", available: true },
-  { id: "P1003", name: "Lars Svensson", available: false },
-];
-
-const statusMap = {
-  pending_approval: { label: "Väntar på godkännande", color: "bg-amber-500" },
-  approved: { label: "Godkänd", color: "bg-blue-500" },
-  assigned: { label: "Tilldelad", color: "bg-green-500" },
-  rejected: { label: "Nekad", color: "bg-red-500" },
-  completed: { label: "Avslutad", color: "bg-purple-500" },
-};
+import { MOCK_SHIPMENTS, MOCK_PILOTS, SHIPMENT_STATUS_MAP, MockShipment } from '../../../src/data/mock-data';
 
 const ShipmentManagement = () => {
   const { user } = useAuth();
   const [showApproveDialog, setShowApproveDialog] = useState(false);
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
-  const [selectedShipment, setSelectedShipment] = useState<
-    (typeof MOCK_SHIPMENTS)[0] | null
-  >(null);
+  const [selectedShipment, setSelectedShipment] = useState<MockShipment | null>(null);
   const [selectedPilot, setSelectedPilot] = useState<string>("");
 
   const handleAction = (
-    shipment: (typeof MOCK_SHIPMENTS)[0],
+    shipment: MockShipment,
     action: "approve" | "reject" | "assign"
   ) => {
     setSelectedShipment(shipment);
@@ -190,10 +137,10 @@ const ShipmentManagement = () => {
                 <TableCell>
                   <Badge
                     className={`${
-                      statusMap[shipment.status as keyof typeof statusMap].color
+                      SHIPMENT_STATUS_MAP[shipment.status as keyof typeof SHIPMENT_STATUS_MAP].color
                     }`}
                   >
-                    {statusMap[shipment.status as keyof typeof statusMap].label}
+                    {SHIPMENT_STATUS_MAP[shipment.status as keyof typeof SHIPMENT_STATUS_MAP].label}
                   </Badge>
                 </TableCell>
                 <TableCell>

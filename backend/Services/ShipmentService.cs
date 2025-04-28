@@ -1,5 +1,6 @@
 using CosmoCargo.Data;
 using CosmoCargo.Model;
+using CosmoCargo.Model.Queries;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Services
@@ -13,25 +14,41 @@ namespace CosmoCargo.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Shipment>> GetAllShipmentsAsync()
+        private IQueryable<Shipment> ApplyFilter(ShipmentsFilter filter)
         {
-            return await _context.Shipments
-                .Include(s => s.Customer)
-                .Include(s => s.Pilot)
-                .ToListAsync();
+            var query = _context.Shipments.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filter.Search))
+            {
+                query = query.Where(s =>
+                    s.Id.ToString().Contains(filter.Search) ||
+                    s.Origin.Contains(filter.Search) ||
+                    s.Destination.Contains(filter.Search));
+            }
+
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(s => s.Status == filter.Status.Value);
+            }
+
+            return query;
         }
 
-        public async Task<IEnumerable<Shipment>> GetShipmentsByCustomerIdAsync(Guid customerId)
+        public async Task<IEnumerable<Shipment>> GetShipmentsAsync(ShipmentsFilter filter)
         {
-            return await _context.Shipments
-                .Include(s => s.Pilot)
+            return await ApplyFilter(filter).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Shipment>> GetShipmentsByCustomerIdAsync(Guid customerId, ShipmentsFilter filter)
+        {
+            return await ApplyFilter(filter)
                 .Where(s => s.CustomerId == customerId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Shipment>> GetShipmentsByPilotIdAsync(Guid pilotId)
+        public async Task<IEnumerable<Shipment>> GetShipmentsByPilotIdAsync(Guid pilotId, ShipmentsFilter filter)
         {
-            return await _context.Shipments
+            return await ApplyFilter(filter)
                 .Include(s => s.Customer)
                 .Where(s => s.PilotId == pilotId)
                 .ToListAsync();

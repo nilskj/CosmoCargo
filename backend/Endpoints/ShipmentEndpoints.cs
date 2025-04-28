@@ -1,14 +1,15 @@
 using CosmoCargo.Model;
+using CosmoCargo.Model.Queries;
 using CosmoCargo.Services;
 using CosmoCargo.Utils;
 using System.Security.Claims;
-
 namespace CosmoCargo.Endpoints
 {
     public static class ShipmentEndpoints
     {
         public static async Task<IResult> GetAllShipments(
             IShipmentService shipmentService,
+            [AsParameters] ShipmentsFilter filter,
             ClaimsPrincipal user)
         {
             var role = user.GetRole();
@@ -17,11 +18,11 @@ namespace CosmoCargo.Endpoints
             IEnumerable<Shipment> shipments;
 
             if (role == UserRole.Admin.ToString())
-                shipments = await shipmentService.GetAllShipmentsAsync();
+                shipments = await shipmentService.GetShipmentsAsync(filter);
             else if (role == UserRole.Pilot.ToString())
-                shipments = await shipmentService.GetShipmentsByPilotIdAsync(userId);
+                shipments = await shipmentService.GetShipmentsByPilotIdAsync(userId, filter);
             else if (role == UserRole.Customer.ToString())
-                shipments = await shipmentService.GetShipmentsByCustomerIdAsync(userId);
+                shipments = await shipmentService.GetShipmentsByCustomerIdAsync(userId, filter);
             else
                 return Results.Forbid();
 
@@ -47,7 +48,7 @@ namespace CosmoCargo.Endpoints
             else if (role == UserRole.Customer.ToString() && shipment.CustomerId == userId)
                 return Results.Ok(shipment);
 
-            return Results.Forbid();
+            return Results.NotFound();
         }
 
         public static async Task<IResult> CreateShipment(

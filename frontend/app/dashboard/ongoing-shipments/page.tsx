@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -11,42 +11,45 @@ import {
 import { Package, Search, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-// Sample data
-const shipments = [
-  {
-    id: "SC-1234567",
-    from: "Jorden, Alpha Station",
-    to: "Mars, Olympus Station",
-    date: "2023-04-10",
-    status: "I transit",
-    progress: 60,
-    pilot: "Anna Karlsson",
-    ship: "Stellar Phoenix IX",
-  },
-  {
-    id: "SC-7654321",
-    from: "Jorden, Beta Station",
-    to: "Europa, Ice Harbor",
-    date: "2023-04-12",
-    status: "Förbereder",
-    progress: 20,
-    pilot: "Marcus Lindqvist",
-    ship: "Quantum Voyager",
-  },
-  {
-    id: "SC-9876543",
-    from: "Mars, Olympus Station",
-    to: "Jorden, Gamma Station",
-    date: "2023-04-08",
-    status: "Närmar sig destination",
-    progress: 85,
-    pilot: "Elsa Berg",
-    ship: "Nebula Sprinter",
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getShipments, ShipmentsFilter } from "@/services/shipment-service";
+import { ShipmentStatus } from "@/model/types";
 
 const OngoingShipments = () => {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<ShipmentStatus | "">("");
+
+  const { data: shipments, refetch } = useQuery({
+    queryKey: ["shipments", search, status],
+    queryFn: () => {
+      const filter: ShipmentsFilter = {};
+      if (search) filter.search = search;
+      if (status) filter.status = status as ShipmentStatus;
+      return getShipments(filter);
+    },
+  });
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatus(e.target.value as ShipmentStatus | "");
+  };
+
+  const getProgressPercentage = (status: ShipmentStatus): number => {
+    switch (status) {
+      case ShipmentStatus.InTransit:
+        return 60;
+      case ShipmentStatus.Delivered:
+        return 100;
+      case ShipmentStatus.Assigned:
+        return 20;
+      default:
+        return 0;
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto">
       <div className="mb-6">
@@ -62,23 +65,31 @@ const OngoingShipments = () => {
           <Input
             placeholder="Sök fraktID eller destination..."
             className="pl-10 space-input w-full"
+            value={search}
+            onChange={handleSearch}
           />
         </div>
 
         <div className="flex gap-2">
-          <select className="space-input">
+          <select 
+            className="space-input"
+            value={status}
+            onChange={handleStatusChange}
+          >
             <option value="">Alla statusar</option>
-            <option value="preparing">Förbereder</option>
-            <option value="in-transit">I transit</option>
-            <option value="approaching">Närmar sig destination</option>
+            <option value={ShipmentStatus.Assigned}>Tilldelad</option>
+            <option value={ShipmentStatus.InTransit}>I transit</option>
+            <option value={ShipmentStatus.Delivered}>Levererad</option>
           </select>
 
-          <Button className="space-button">Uppdatera</Button>
+          <Button className="space-button" onClick={() => refetch()}>
+            Uppdatera
+          </Button>
         </div>
       </div>
 
       <div className="grid gap-6">
-        {shipments.map((shipment) => (
+        {shipments?.map((shipment) => (
           <Card key={shipment.id} className="space-card overflow-hidden">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
@@ -87,12 +98,12 @@ const OngoingShipments = () => {
                     <Package className="h-5 w-5 mr-2" />
                     {shipment.id}
                   </CardTitle>
-                  <CardDescription>Skickad: {shipment.date}</CardDescription>
+                  <CardDescription>Skickad: {shipment.createdAt}</CardDescription>
                 </div>
                 <div className="text-right">
                   <div className="font-medium">{shipment.status}</div>
                   <div className="text-sm text-space-text-secondary">
-                    Pilot: {shipment.pilot}
+                    Pilot: {shipment.pilotId || "Inte tilldelad"}
                   </div>
                 </div>
               </div>
@@ -100,13 +111,13 @@ const OngoingShipments = () => {
             <CardContent>
               <div className="mb-6">
                 <div className="flex justify-between mb-2 text-sm">
-                  <div>{shipment.from}</div>
-                  <div>{shipment.to}</div>
+                  <div>{shipment.origin}</div>
+                  <div>{shipment.destination}</div>
                 </div>
                 <div className="relative pt-1">
                   <div className="overflow-hidden h-2 text-xs flex rounded bg-space-secondary/50">
                     <div
-                      style={{ width: `${shipment.progress}%` }}
+                      style={{ width: `${getProgressPercentage(shipment.status)}%` }}
                       className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-space-accent-blue to-space-accent-purple"
                     ></div>
                   </div>
@@ -115,7 +126,7 @@ const OngoingShipments = () => {
 
               <div className="flex justify-between items-center">
                 <div className="text-space-text-secondary text-sm">
-                  Skepp: {shipment.ship}
+                  Last: {shipment.cargo}
                 </div>
                 <Button size="sm" variant="outline">
                   <Eye className="h-4 w-4 mr-2" />
