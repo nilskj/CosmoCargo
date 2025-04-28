@@ -111,8 +111,8 @@ const OngoingShipments = () => {
             <CardContent>
               <div className="mb-6">
                 <div className="flex justify-between mb-2 text-sm">
-                  <div>{shipment.origin}</div>
-                  <div>{shipment.destination}</div>
+                  <div>{shipment.sender.planet}</div>
+                  <div>{shipment.receiver.planet}</div>
                 </div>
                 <div className="relative pt-1">
                   <div className="overflow-hidden h-2 text-xs flex rounded bg-space-secondary/50">
@@ -126,7 +126,7 @@ const OngoingShipments = () => {
 
               <div className="flex justify-between items-center">
                 <div className="text-space-text-secondary text-sm">
-                  Last: {shipment.cargo}
+                  Last: {shipment.category}
                 </div>
                 <Button size="sm" variant="outline">
                   <Eye className="h-4 w-4 mr-2" />
