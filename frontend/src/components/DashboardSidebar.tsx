@@ -27,13 +27,8 @@ const navItems = [
       { icon: Package, label: "Boka Frakt", href: "/dashboard/book-shipment" },
       {
         icon: PackageCheck,
-        label: "Pågående Leveranser",
+        label: "Leveranser",
         href: "/dashboard/ongoing-shipments",
-      },
-      {
-        icon: Clock,
-        label: "Tidigare Leveranser",
-        href: "/dashboard/previous-shipments",
       },
     ],
   },
