@@ -56,10 +56,6 @@ namespace CosmoCargo.Endpoints
             IShipmentService shipmentService,
             ClaimsPrincipal user)
         {
-            var role = user.GetRole();
-            if (role == UserRole.Customer.ToString())
-                return Results.Forbid();
-
             var userId = user.GetUserId();
 
             var shipment = new Shipment
