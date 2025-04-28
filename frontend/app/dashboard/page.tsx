@@ -145,7 +145,7 @@ const recentShipments = [
 const DashboardOverview: React.FC = () => {
   return (
     <>
-    <div className="fixed z-1 top-0 left-0 w-full h-full flex items-center justify-center rotate-[-20deg] text-5xl">WORK IN PROGRESS</div>
+    <div className="fixed z-1 top-0 left-0 w-full h-full flex items-center justify-center rotate-[-20deg] text-5xl pointer-events-none">WORK IN PROGRESS</div>
 
     <div className="space-y-6">
       <div className="flex items-center justify-between">
