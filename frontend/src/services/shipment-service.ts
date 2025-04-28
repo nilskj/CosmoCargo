@@ -1,5 +1,5 @@
 import { api } from "./api";
-import Shipment, { ShipmentContact } from "../model/shipment";
+import Shipment, { ShipmentContact, PaginatedResult } from "../model/shipment";
 import { ShipmentStatus } from "../model/types";
 
 export interface CreateShipmentRequest {
@@ -23,14 +23,18 @@ export interface AssignPilotRequest {
 export interface ShipmentsFilter {
     search?: string;
     status?: ShipmentStatus;
+    page?: number;
+    pageSize?: number;
 }
 
-export const getShipments = async (filter?: ShipmentsFilter): Promise<Shipment[]> => {
+export const getShipments = async (filter?: ShipmentsFilter): Promise<PaginatedResult<Shipment>> => {
     const queryParams = new URLSearchParams();
     if (filter?.search) queryParams.append('search', filter.search);
     if (filter?.status) queryParams.append('status', filter.status);
+    queryParams.append('page', (filter?.page || 1).toString());
+    queryParams.append('pageSize', (filter?.pageSize || 10).toString());
     
-    const response = await api.get<Shipment[]>(`/shipments?${queryParams.toString()}`);
+    const response = await api.get<PaginatedResult<Shipment>>(`/shipments?${queryParams.toString()}`);
     return response.data;
 };
 

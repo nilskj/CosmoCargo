@@ -89,7 +89,7 @@ const OngoingShipments = () => {
       </div>
 
       <div className="grid gap-6">
-        {shipments?.map((shipment) => (
+        {shipments?.items.map((shipment) => (
           <Card key={shipment.id} className="space-card overflow-hidden">
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
