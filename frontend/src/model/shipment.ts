@@ -1,17 +1,24 @@
-import { ShipmentStatus, RiskLevel } from './types';
+import { ShipmentStatus } from './types';
+
+export interface ShipmentContact {
+    name: string;
+    email: string;
+    planet: string;
+    station: string;
+}
 
 export default interface Shipment {
     id: string;
     customerId: string;
     pilotId?: string | null;
-    origin: string;
-    destination: string;
+    sender: ShipmentContact;
+    receiver: ShipmentContact;
     weight: number;
-    cargo: string;
+    category: string;
     priority: string;
+    description?: string | null;
+    hasInsurance: boolean;
     status: ShipmentStatus;
-    riskLevel: RiskLevel;
-    scheduledDate?: string | null;
     createdAt: string;
     updatedAt: string;
 }

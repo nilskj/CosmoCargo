@@ -1,14 +1,15 @@
 import { api } from "./api";
-import Shipment from "../model/shipment";
+import Shipment, { ShipmentContact } from "../model/shipment";
 import { ShipmentStatus } from "../model/types";
 
 export interface CreateShipmentRequest {
-    origin: string;
-    destination: string;
+    origin: ShipmentContact;
+    destination: ShipmentContact;
     weight: number;
-    cargo: string;
+    category: string;
     priority: string;
-    scheduledDate?: string | null;
+    description?: string | null;
+    hasInsurance: boolean;
 }
 
 export interface UpdateShipmentStatusRequest {
