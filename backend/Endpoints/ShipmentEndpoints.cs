@@ -64,14 +64,27 @@ namespace CosmoCargo.Endpoints
 
             var shipment = new Shipment
             {
+                Id = Guid.NewGuid(),
                 CustomerId = userId,
-                Origin = request.Origin,
-                Destination = request.Destination,
+                Sender = new ShipmentContact
+                {
+                    Name = request.Origin.Name,
+                    Email = request.Origin.Email,
+                    Planet = request.Origin.Planet,
+                    Station = request.Origin.Station
+                },
+                Receiver = new ShipmentContact
+                {
+                    Name = request.Destination.Name,
+                    Email = request.Destination.Email,
+                    Planet = request.Destination.Planet,
+                    Station = request.Destination.Station
+                },
                 Weight = request.Weight,
-                Cargo = request.Cargo,
+                Category = request.Category,
                 Priority = request.Priority,
-                ScheduledDate = request.ScheduledDate,
-                
+                Description = request.Description,
+                HasInsurance = request.HasInsurance,
             };
 
             var createdShipment = await shipmentService.CreateShipmentAsync(shipment);
@@ -119,14 +132,23 @@ namespace CosmoCargo.Endpoints
         }
     }
 
+    public class LocationDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Planet { get; set; } = string.Empty;
+        public string Station { get; set; } = string.Empty;
+    }
+
     public class CreateShipmentRequest
     {
-        public string Origin { get; set; } = string.Empty;
-        public string Destination { get; set; } = string.Empty;
+        public LocationDto Origin { get; set; } = new();
+        public LocationDto Destination { get; set; } = new();
         public decimal Weight { get; set; }
-        public string Cargo { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
-        public DateTime? ScheduledDate { get; set; }
+        public string? Description { get; set; }
+        public bool HasInsurance { get; set; }
     }
 
     public class UpdateShipmentStatusRequest

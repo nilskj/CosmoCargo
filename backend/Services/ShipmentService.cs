@@ -22,8 +22,14 @@ namespace CosmoCargo.Services
             {
                 query = query.Where(s =>
                     s.Id.ToString().Contains(filter.Search) ||
-                    s.Origin.Contains(filter.Search) ||
-                    s.Destination.Contains(filter.Search));
+                    s.Sender.Name.Contains(filter.Search) ||
+                    s.Sender.Email.Contains(filter.Search) ||
+                    s.Sender.Planet.Contains(filter.Search) ||
+                    s.Sender.Station.Contains(filter.Search) ||
+                    s.Receiver.Name.Contains(filter.Search) ||
+                    s.Receiver.Email.Contains(filter.Search) ||
+                    s.Receiver.Planet.Contains(filter.Search) ||
+                    s.Receiver.Station.Contains(filter.Search));
             }
 
             if (filter.Status.HasValue)
@@ -68,13 +74,6 @@ namespace CosmoCargo.Services
             shipment.CreatedAt = DateTime.UtcNow;
             shipment.UpdatedAt = DateTime.UtcNow;
             shipment.Status = ShipmentStatus.WaitingForApproval;
-            shipment.RiskLevel = shipment.RiskLevel;
-            shipment.Priority = shipment.Priority;
-            shipment.Weight = shipment.Weight;
-            shipment.Cargo = shipment.Cargo;
-            shipment.Origin = shipment.Origin;
-            shipment.Destination = shipment.Destination;
-            shipment.CustomerId = shipment.CustomerId;
             shipment.PilotId = null;
 
             _context.Shipments.Add(shipment);

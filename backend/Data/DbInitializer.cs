@@ -162,7 +162,7 @@ namespace CosmoCargo.Data
                 await connection.OpenAsync();
 
             using var writer = await connection.BeginBinaryImportAsync(
-                "COPY shipments (id, customer_id, pilot_id, sender_name, sender_email, sender_planet, sender_station, receiver_name, receiver_email, receiver_planet, receiver_station, weight, category, priority, description, has_insurance, status, scheduled_date, created_at, updated_at) FROM STDIN (FORMAT BINARY)");
+                "COPY shipments (id, customer_id, pilot_id, sender_name, sender_email, sender_planet, sender_station, receiver_name, receiver_email, receiver_planet, receiver_station, weight, category, priority, description, has_insurance, status, created_at, updated_at) FROM STDIN (FORMAT BINARY)");
 
             foreach (var shipment in shipments)
             {
@@ -184,7 +184,6 @@ namespace CosmoCargo.Data
                 await writer.WriteAsync(shipment.Description);
                 await writer.WriteAsync(shipment.HasInsurance);
                 await writer.WriteAsync((int)shipment.Status);
-                await writer.WriteAsync(shipment.ScheduledDate);
                 await writer.WriteAsync(shipment.CreatedAt);
                 await writer.WriteAsync(shipment.UpdatedAt);
             }
@@ -531,7 +530,6 @@ namespace CosmoCargo.Data
                         
                         // Status and tracking
                         Status = status,
-                        ScheduledDate = scheduledDate,
                         CreatedAt = createdAt,
                         UpdatedAt = updatedAt
                     });
