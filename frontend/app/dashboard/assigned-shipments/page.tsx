@@ -14,37 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Rocket, CheckCircle, AlertCircle } from "lucide-react";
-
-// Mock data for assigned shipments
-const MOCK_ASSIGNED_SHIPMENTS = [
-  {
-    id: "SHIP-1001",
-    customer: "Johan Andersson",
-    origin: "Stockholm, Sweden",
-    destination: "Lunar Colony Alpha",
-    scheduledDate: "2025-04-25",
-    status: "pending",
-    cargo: "Scientific Equipment",
-  },
-  {
-    id: "SHIP-1002",
-    customer: "Maria Johansson",
-    origin: "Gothenburg, Sweden",
-    destination: "Mars Base One",
-    scheduledDate: "2025-04-28",
-    status: "in_transit",
-    cargo: "Medical Supplies",
-  },
-  {
-    id: "SHIP-1003",
-    customer: "Erik Nilsson",
-    origin: "Malmö, Sweden",
-    destination: "Titan Research Station",
-    scheduledDate: "2025-05-02",
-    status: "pending",
-    cargo: "Construction Materials",
-  },
-];
+import { MOCK_ASSIGNED_SHIPMENTS } from '../../../src/data/mock-data';
 
 const statusMap = {
   pending: { label: "Väntande", color: "bg-amber-500" },

@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Package, ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BookShipment = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +61,8 @@ const BookShipment = () => {
                     placeholder="Ditt namn"
                     className="space-input"
                     required
+                    value={user?.name || ""}
+                    disabled
                   />
                 </div>
 
@@ -70,6 +74,8 @@ const BookShipment = () => {
                     placeholder="din@email.com"
                     className="space-input"
                     required
+                    value={user?.email || ""}
+                    disabled
                   />
                 </div>
 
@@ -155,36 +161,6 @@ const BookShipment = () => {
                     className="space-input"
                     required
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="package-dimensions">Dimensioner (cm) *</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Input
-                      id="package-length"
-                      type="number"
-                      min="1"
-                      placeholder="Längd"
-                      className="space-input"
-                      required
-                    />
-                    <Input
-                      id="package-width"
-                      type="number"
-                      min="1"
-                      placeholder="Bredd"
-                      className="space-input"
-                      required
-                    />
-                    <Input
-                      id="package-height"
-                      type="number"
-                      min="1"
-                      placeholder="Höjd"
-                      className="space-input"
-                      required
-                    />
-                  </div>
                 </div>
 
                 <div className="space-y-2">

@@ -1,5 +1,6 @@
 using CosmoCargo.Data;
 using CosmoCargo.Model;
+using CosmoCargo.Model.Queries;
 using Microsoft.EntityFrameworkCore;
 
 namespace CosmoCargo.Services
@@ -13,25 +14,47 @@ namespace CosmoCargo.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<Shipment>> GetAllShipmentsAsync()
+        private IQueryable<Shipment> ApplyFilter(ShipmentsFilter filter)
         {
-            return await _context.Shipments
-                .Include(s => s.Customer)
-                .Include(s => s.Pilot)
-                .ToListAsync();
+            var query = _context.Shipments.AsQueryable();
+
+            if (!string.IsNullOrEmpty(filter.Search))
+            {
+                query = query.Where(s =>
+                    s.Id.ToString().Contains(filter.Search) ||
+                    s.Sender.Name.Contains(filter.Search) ||
+                    s.Sender.Email.Contains(filter.Search) ||
+                    s.Sender.Planet.Contains(filter.Search) ||
+                    s.Sender.Station.Contains(filter.Search) ||
+                    s.Receiver.Name.Contains(filter.Search) ||
+                    s.Receiver.Email.Contains(filter.Search) ||
+                    s.Receiver.Planet.Contains(filter.Search) ||
+                    s.Receiver.Station.Contains(filter.Search));
+            }
+
+            if (filter.Status.HasValue)
+            {
+                query = query.Where(s => s.Status == filter.Status.Value);
+            }
+
+            return query;
         }
 
-        public async Task<IEnumerable<Shipment>> GetShipmentsByCustomerIdAsync(Guid customerId)
+        public async Task<IEnumerable<Shipment>> GetShipmentsAsync(ShipmentsFilter filter)
         {
-            return await _context.Shipments
-                .Include(s => s.Pilot)
+            return await ApplyFilter(filter).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Shipment>> GetShipmentsByCustomerIdAsync(Guid customerId, ShipmentsFilter filter)
+        {
+            return await ApplyFilter(filter)
                 .Where(s => s.CustomerId == customerId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Shipment>> GetShipmentsByPilotIdAsync(Guid pilotId)
+        public async Task<IEnumerable<Shipment>> GetShipmentsByPilotIdAsync(Guid pilotId, ShipmentsFilter filter)
         {
-            return await _context.Shipments
+            return await ApplyFilter(filter)
                 .Include(s => s.Customer)
                 .Where(s => s.PilotId == pilotId)
                 .ToListAsync();
@@ -51,13 +74,6 @@ namespace CosmoCargo.Services
             shipment.CreatedAt = DateTime.UtcNow;
             shipment.UpdatedAt = DateTime.UtcNow;
             shipment.Status = ShipmentStatus.WaitingForApproval;
-            shipment.RiskLevel = shipment.RiskLevel;
-            shipment.Priority = shipment.Priority;
-            shipment.Weight = shipment.Weight;
-            shipment.Cargo = shipment.Cargo;
-            shipment.Origin = shipment.Origin;
-            shipment.Destination = shipment.Destination;
-            shipment.CustomerId = shipment.CustomerId;
             shipment.PilotId = null;
 
             _context.Shipments.Add(shipment);

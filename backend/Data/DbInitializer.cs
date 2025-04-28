@@ -162,7 +162,7 @@ namespace CosmoCargo.Data
                 await connection.OpenAsync();
 
             using var writer = await connection.BeginBinaryImportAsync(
-                "COPY shipments (id, customer_id, pilot_id, origin, destination, weight, cargo, priority, status, risk_level, scheduled_date, created_at, updated_at) FROM STDIN (FORMAT BINARY)");
+                "COPY shipments (id, customer_id, pilot_id, sender_name, sender_email, sender_planet, sender_station, receiver_name, receiver_email, receiver_planet, receiver_station, weight, category, priority, description, has_insurance, status, created_at, updated_at) FROM STDIN (FORMAT BINARY)");
 
             foreach (var shipment in shipments)
             {
@@ -170,14 +170,20 @@ namespace CosmoCargo.Data
                 await writer.WriteAsync(shipment.Id);
                 await writer.WriteAsync(shipment.CustomerId);
                 await writer.WriteAsync(shipment.PilotId);
-                await writer.WriteAsync(shipment.Origin);
-                await writer.WriteAsync(shipment.Destination);
+                await writer.WriteAsync(shipment.Sender.Name);
+                await writer.WriteAsync(shipment.Sender.Email);
+                await writer.WriteAsync(shipment.Sender.Planet);
+                await writer.WriteAsync(shipment.Sender.Station);
+                await writer.WriteAsync(shipment.Receiver.Name);
+                await writer.WriteAsync(shipment.Receiver.Email);
+                await writer.WriteAsync(shipment.Receiver.Planet);
+                await writer.WriteAsync(shipment.Receiver.Station);
                 await writer.WriteAsync(shipment.Weight);
-                await writer.WriteAsync(shipment.Cargo);
+                await writer.WriteAsync(shipment.Category);
                 await writer.WriteAsync(shipment.Priority);
+                await writer.WriteAsync(shipment.Description);
+                await writer.WriteAsync(shipment.HasInsurance);
                 await writer.WriteAsync((int)shipment.Status);
-                await writer.WriteAsync((int)shipment.RiskLevel);
-                await writer.WriteAsync(shipment.ScheduledDate);
                 await writer.WriteAsync(shipment.CreatedAt);
                 await writer.WriteAsync(shipment.UpdatedAt);
             }
@@ -469,7 +475,6 @@ namespace CosmoCargo.Data
                 .ToListAsync();
 
             var statuses = Enum.GetValues<ShipmentStatus>();
-            var riskLevels = Enum.GetValues<RiskLevel>();
             var priorities = new[] { "Low", "Normal", "High", "Urgent" };
             
             var batches = (int)Math.Ceiling((double)TotalShipments / BatchSize);
@@ -497,14 +502,34 @@ namespace CosmoCargo.Data
                         PilotId = status == ShipmentStatus.Assigned 
                             || status == ShipmentStatus.InTransit 
                             || status == ShipmentStatus.Delivered ? (Random.Shared.Next(100) < 5 ? DemoPilotId : pilotIds[_random.Next(pilotIds.Count)]) : null,
-                        Origin = _origins[_random.Next(_origins.Length)],
-                        Destination = _destinations[_random.Next(_destinations.Length)],
+                        
+                        // Sender information
+                        Sender = new ShipmentContact
+                        {
+                            Name = $"{_firstNames[_random.Next(_firstNames.Length)]} {_lastNames[_random.Next(_lastNames.Length)]}",
+                            Email = GenerateUniqueEmail("sender", "shipment", "example.com"),
+                            Planet = _origins[_random.Next(_origins.Length)].Split(',')[0].Trim(),
+                            Station = _origins[_random.Next(_origins.Length)].Split(',')[1].Trim()
+                        },
+                        
+                        // Receiver information
+                        Receiver = new ShipmentContact
+                        {
+                            Name = $"{_firstNames[_random.Next(_firstNames.Length)]} {_lastNames[_random.Next(_lastNames.Length)]}",
+                            Email = GenerateUniqueEmail("receiver", "shipment", "example.com"),
+                            Planet = _destinations[_random.Next(_destinations.Length)].Split(',')[0].Trim(),
+                            Station = _destinations[_random.Next(_destinations.Length)].Split(',')[1].Trim()
+                        },
+                        
+                        // Package information
                         Weight = _random.Next(50, 1000),
-                        Cargo = _cargoTypes[_random.Next(_cargoTypes.Length)],
+                        Category = _cargoTypes[_random.Next(_cargoTypes.Length)],
                         Priority = priorities[_random.Next(priorities.Length)],
+                        Description = $"Sample shipment #{i + 1}",
+                        HasInsurance = _random.Next(100) < 70, // 70% chance of having insurance
+                        
+                        // Status and tracking
                         Status = status,
-                        RiskLevel = riskLevels[_random.Next(riskLevels.Length)],
-                        ScheduledDate = scheduledDate,
                         CreatedAt = createdAt,
                         UpdatedAt = updatedAt
                     });

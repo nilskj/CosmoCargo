@@ -5,17 +5,22 @@ namespace CosmoCargo.Model
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
         public Guid? PilotId { get; set; }
-        public string Origin { get; set; } = string.Empty;
-        public string Destination { get; set; } = string.Empty;
+        public ShipmentContact Sender { get; set; } = new();
+        public ShipmentContact Receiver { get; set; } = new();
+        
+        // Package information
         public decimal Weight { get; set; }
-        public string Cargo { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool HasInsurance { get; set; }
+        
+        // Status and tracking
         public ShipmentStatus Status { get; set; }
-        public RiskLevel RiskLevel { get; set; }
-        public DateTime? ScheduledDate { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
+        // Navigation properties
         public virtual User Customer { get; set; } = null!;
         public virtual User? Pilot { get; set; }
     }

@@ -30,37 +30,7 @@ import {
   UserX,
   Edit,
 } from "lucide-react";
-
-// Mock data for pilots
-const MOCK_PILOTS = [
-  {
-    id: "P1001",
-    name: "Erik Nilsson",
-    email: "pilot@example.com",
-    status: "active",
-    experience: "5 years",
-    assignedShipments: 1,
-    rating: 4.8,
-  },
-  {
-    id: "P1002",
-    name: "Anna Lindberg",
-    email: "anna.lindberg@example.com",
-    status: "inactive",
-    experience: "3 years",
-    assignedShipments: 0,
-    rating: 4.5,
-  },
-  {
-    id: "P1003",
-    name: "Lars Svensson",
-    email: "lars.svensson@example.com",
-    status: "active",
-    experience: "7 years",
-    assignedShipments: 2,
-    rating: 4.9,
-  },
-];
+import { MOCK_PILOTS, MockPilot } from '../../../src/data/mock-data';
 
 const PilotsManagement = () => {
   const { user } = useAuth();
@@ -72,7 +42,7 @@ const PilotsManagement = () => {
   >(null);
 
   const handleAction = (
-    pilot: (typeof MOCK_PILOTS)[0],
+    pilot: MockPilot,
     action: "approve" | "suspend"
   ) => {
     setSelectedPilot(pilot);

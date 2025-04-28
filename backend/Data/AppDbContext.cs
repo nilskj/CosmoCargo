@@ -45,9 +45,32 @@ namespace CosmoCargo.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.Property(e => e.Origin).IsRequired();
-                entity.Property(e => e.Destination).IsRequired();
-                entity.Property(e => e.Cargo).IsRequired();
+                
+                // Configure owned entity types
+                entity.OwnsOne(e => e.Sender, sender =>
+                {
+                    sender.Property(s => s.Name).IsRequired();
+                    sender.Property(s => s.Email).IsRequired();
+                    sender.Property(s => s.Planet).IsRequired();
+                    sender.Property(s => s.Station).IsRequired();
+                });
+                
+                entity.OwnsOne(e => e.Receiver, receiver =>
+                {
+                    receiver.Property(r => r.Name).IsRequired();
+                    receiver.Property(r => r.Email).IsRequired();
+                    receiver.Property(r => r.Planet).IsRequired();
+                    receiver.Property(r => r.Station).IsRequired();
+                });
+                
+                // Package information
+                entity.Property(e => e.Weight).IsRequired();
+                entity.Property(e => e.Category).IsRequired();
+                entity.Property(e => e.Priority).IsRequired();
+                entity.Property(e => e.Description);
+                entity.Property(e => e.HasInsurance).IsRequired();
+                
+                // Status and tracking
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.CreatedAt).IsRequired();
                 entity.Property(e => e.UpdatedAt).IsRequired();
