@@ -12,7 +12,6 @@ namespace CosmoCargo.Data
         private static int TotalAdmins = Random.Shared.Next(50_000, 100_000);
         private static int TotalShipments = Random.Shared.Next(6_000_000, 8_000_000);
 
-        private static readonly Random _random = new Random();
         private static readonly ConcurrentDictionary<string, byte> _takenEmails = new ConcurrentDictionary<string, byte>();
         private static Guid DemoCustomerId;
         private static Guid DemoPilotId;
@@ -23,23 +22,43 @@ namespace CosmoCargo.Data
         private const int DeadlockRetryDelay = 2000;
         private static readonly string[] _origins = new[]
         {
-            "Stockholm, Sweden", "Gothenburg, Sweden", "Malmö, Sweden",
-            "Jorden, Alpha Station", "Jorden, Beta Station", "Jorden, Gamma Station",
-            "Mars, Olympus Station", "Mars Base One", "Lunar Colony Alpha",
-            "Titan Research Station", "Europa, Ice Harbor", "Ganymede Outpost",
-            "Callisto Mining Facility", "Io Research Base", "Enceladus Station"
+            "Earth, Stockholm Station",
+            "Earth, Gothenburg Station",
+            "Earth, Malmö Station",
+            "Earth, Alpha Station",
+            "Earth, Beta Station",
+            "Earth, Gamma Station",
+            "Mars, Olympus Station",
+            "Mars, Base One",
+            "Moon, Colony Alpha",
+            "Titan, Research Station",
+            "Europa, Ice Harbor",
+            "Ganymede, Outpost",
+            "Callisto, Mining Facility",
+            "Io, Research Base",
+            "Enceladus, Station"
         };
 
         private static readonly string[] _destinations = new[]
         {
-            "Mars, Olympus Station", "Mars Base One", "Lunar Colony Alpha",
-            "Titan Research Station", "Europa, Ice Harbor", "Ganymede Outpost",
-            "Callisto Mining Facility", "Io Research Base", "Enceladus Station",
-            "Triton Research Base", "Pluto Station", "Charon Outpost",
-            "Ceres Mining Facility", "Vesta Research Station", "Pallas Colony"
+            "Mars, Olympus Station",
+            "Mars, Base One",
+            "Moon, Colony Alpha",
+            "Titan, Research Station",
+            "Europa, Ice Harbor",
+            "Ganymede, Outpost",
+            "Callisto, Mining Facility",
+            "Io, Research Base",
+            "Enceladus, Station",
+            "Triton, Research Base",
+            "Pluto, Station",
+            "Charon, Outpost",
+            "Ceres, Mining Facility",
+            "Vesta, Research Station",
+            "Pallas, Colony"
         };
 
-        private static readonly string[] _cargoTypes = new[]
+        private static readonly string[] _categories = new[]
         {
             "Scientific Equipment", "Medical Supplies", "Construction Materials",
             "Food Supplies", "Mining Equipment", "Research Samples",
@@ -47,6 +66,8 @@ namespace CosmoCargo.Data
             "Water Supplies", "Oxygen Tanks", "Fuel Cells",
             "Electronics", "Raw Materials", "Agricultural Products"
         };
+
+        private static readonly string[] _priorities = new[] { "Low", "Normal", "High", "Urgent" };
 
         private static readonly string[] _firstNames = new[]
         {
@@ -202,6 +223,8 @@ namespace CosmoCargo.Data
             DemoPilotId = Guid.NewGuid();
             DemoAdminId = Guid.NewGuid();
 
+            var random = new Random(Environment.TickCount);
+
             var demoUsers = new List<User>
             {
                 new User
@@ -213,7 +236,7 @@ namespace CosmoCargo.Data
                     Role = UserRole.Customer,
                     Experience = null,
                     IsActive = null,
-                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                    CreatedAt = DateTime.UtcNow.AddDays(-random.Next(0, 365))
                 },
                 new User
                 {
@@ -224,7 +247,7 @@ namespace CosmoCargo.Data
                     Role = UserRole.Pilot,
                     Experience = null,
                     IsActive = null,
-                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                    CreatedAt = DateTime.UtcNow.AddDays(-random.Next(0, 365))
                 },
                 new User
                 {
@@ -235,7 +258,7 @@ namespace CosmoCargo.Data
                     Role = UserRole.Admin,
                     Experience = null,
                     IsActive = null,
-                    CreatedAt = DateTime.UtcNow.AddDays(-_random.Next(0, 365))
+                    CreatedAt = DateTime.UtcNow.AddDays(-random.Next(0, 365))
                 },
             };
 
@@ -258,12 +281,13 @@ namespace CosmoCargo.Data
                 var customers = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalCustomers - batch * BatchSize);
+                var random = new Random(Environment.TickCount + batch * 1000);
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var firstName = _firstNames[_random.Next(_firstNames.Length)];
-                    var lastName = _lastNames[_random.Next(_lastNames.Length)];
-                    var experience = $"{_experienceLevels[_random.Next(_experienceLevels.Length)]} in {_industries[_random.Next(_industries.Length)]}";
+                    var firstName = _firstNames[random.Next(_firstNames.Length)];
+                    var lastName = _lastNames[random.Next(_lastNames.Length)];
+                    var experience = $"{_experienceLevels[random.Next(_experienceLevels.Length)]} in {_industries[random.Next(_industries.Length)]}";
                     var userNumber = batch * BatchSize + i + 1;
 
                     customers.Add(new User
@@ -274,8 +298,8 @@ namespace CosmoCargo.Data
                         PasswordHash = Utils.Crypto.HashPassword($"Customer{userNumber}"),
                         Role = UserRole.Customer,
                         Experience = experience,
-                        IsActive = _random.Next(100) < 95,
-                        CreatedAt = now.AddDays(-_random.Next(0, 365))
+                        IsActive = random.Next(100) < 95,
+                        CreatedAt = now.AddDays(-random.Next(0, 365))
                     });
                 }
 
@@ -332,12 +356,13 @@ namespace CosmoCargo.Data
                 var pilots = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalPilots - batch * BatchSize);
+                var random = new Random(Environment.TickCount + batch * 1000);
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var firstName = _firstNames[_random.Next(_firstNames.Length)];
-                    var lastName = _lastNames[_random.Next(_lastNames.Length)];
-                    var experience = $"{_experienceLevels[_random.Next(_experienceLevels.Length)]} of space piloting";
+                    var firstName = _firstNames[random.Next(_firstNames.Length)];
+                    var lastName = _lastNames[random.Next(_lastNames.Length)];
+                    var experience = $"{_experienceLevels[random.Next(_experienceLevels.Length)]} of space piloting";
                     var userNumber = batch * BatchSize + i + 1;
 
                     pilots.Add(new User
@@ -348,8 +373,8 @@ namespace CosmoCargo.Data
                         PasswordHash = Utils.Crypto.HashPassword($"Pilot{userNumber}"),
                         Role = UserRole.Pilot,
                         Experience = experience,
-                        IsActive = _random.Next(100) < 90,
-                        CreatedAt = now.AddDays(-_random.Next(0, 365))
+                        IsActive = random.Next(100) < 90,
+                        CreatedAt = now.AddDays(-random.Next(0, 365))
                     });
                 }
 
@@ -401,12 +426,13 @@ namespace CosmoCargo.Data
                 var admins = new List<User>(BatchSize);
                 var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalAdmins - batch * BatchSize);
+                var random = new Random(Environment.TickCount + batch * 1000);
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var firstName = _firstNames[_random.Next(_firstNames.Length)];
-                    var lastName = _lastNames[_random.Next(_lastNames.Length)];
-                    var experience = $"{_experienceLevels[_random.Next(_experienceLevels.Length)]} in space logistics management";
+                    var firstName = _firstNames[random.Next(_firstNames.Length)];
+                    var lastName = _lastNames[random.Next(_lastNames.Length)];
+                    var experience = $"{_experienceLevels[random.Next(_experienceLevels.Length)]} in space logistics management";
                     var userNumber = batch * BatchSize + i + 1;
 
                     admins.Add(new User
@@ -417,8 +443,8 @@ namespace CosmoCargo.Data
                         PasswordHash = Utils.Crypto.HashPassword($"Admin{userNumber}"),
                         Role = UserRole.Admin,
                         Experience = experience,
-                        IsActive = _random.Next(100) < 98,
-                        CreatedAt = now.AddDays(-_random.Next(0, 365))
+                        IsActive = random.Next(100) < 98,
+                        CreatedAt = now.AddDays(-random.Next(0, 365))
                     });
                 }
 
@@ -475,7 +501,6 @@ namespace CosmoCargo.Data
                 .ToListAsync();
 
             var statuses = Enum.GetValues<ShipmentStatus>();
-            var priorities = new[] { "Low", "Normal", "High", "Urgent" };
             
             var batches = (int)Math.Ceiling((double)TotalShipments / BatchSize);
             var options = new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism };
@@ -483,6 +508,7 @@ namespace CosmoCargo.Data
             {
                 using var scope = serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var random = new Random(Environment.TickCount + batch * 1000); // Create a new Random instance for each batch
 
                 var shipments = new List<Shipment>(BatchSize);
                 var now = DateTime.UtcNow;
@@ -490,43 +516,43 @@ namespace CosmoCargo.Data
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var scheduledDate = now.AddDays(_random.Next(-365, 365));
-                    var createdAt = scheduledDate.AddDays(-_random.Next(1, 30));
-                    var updatedAt = createdAt.AddDays(_random.Next(0, 30));
-                    var status = statuses[_random.Next(statuses.Length)];
+                    var scheduledDate = now.AddDays(random.Next(-365, 365));
+                    var createdAt = scheduledDate.AddDays(-random.Next(1, 30));
+                    var updatedAt = createdAt.AddDays(random.Next(0, 30));
+                    var status = statuses[random.Next(statuses.Length)];
 
                     shipments.Add(new Shipment
                     {
                         Id = Guid.NewGuid(),
-                        CustomerId = Random.Shared.Next(100) < 5 ? DemoCustomerId : customerIds[_random.Next(customerIds.Count)],
+                        CustomerId = random.Next(100) < 5 ? DemoCustomerId : customerIds[random.Next(customerIds.Count)],
                         PilotId = status == ShipmentStatus.Assigned 
                             || status == ShipmentStatus.InTransit 
-                            || status == ShipmentStatus.Delivered ? (Random.Shared.Next(100) < 5 ? DemoPilotId : pilotIds[_random.Next(pilotIds.Count)]) : null,
+                            || status == ShipmentStatus.Delivered ? (random.Next(100) < 5 ? DemoPilotId : pilotIds[random.Next(pilotIds.Count)]) : null,
                         
                         // Sender information
                         Sender = new ShipmentContact
                         {
-                            Name = $"{_firstNames[_random.Next(_firstNames.Length)]} {_lastNames[_random.Next(_lastNames.Length)]}",
+                            Name = $"{_firstNames[random.Next(_firstNames.Length)]} {_lastNames[random.Next(_lastNames.Length)]}",
                             Email = GenerateUniqueEmail("sender", "shipment", "example.com"),
-                            Planet = _origins[_random.Next(_origins.Length)].Split(',')[0].Trim(),
-                            Station = _origins[_random.Next(_origins.Length)].Split(',')[1].Trim()
+                            Planet = _origins[random.Next(_origins.Length)].Split(',')[0].Trim(),
+                            Station = _origins[random.Next(_origins.Length)].Split(',')[1].Trim()
                         },
                         
                         // Receiver information
                         Receiver = new ShipmentContact
                         {
-                            Name = $"{_firstNames[_random.Next(_firstNames.Length)]} {_lastNames[_random.Next(_lastNames.Length)]}",
+                            Name = $"{_firstNames[random.Next(_firstNames.Length)]} {_lastNames[random.Next(_lastNames.Length)]}",
                             Email = GenerateUniqueEmail("receiver", "shipment", "example.com"),
-                            Planet = _destinations[_random.Next(_destinations.Length)].Split(',')[0].Trim(),
-                            Station = _destinations[_random.Next(_destinations.Length)].Split(',')[1].Trim()
+                            Planet = _destinations[random.Next(_destinations.Length)].Split(',')[0].Trim(),
+                            Station = _destinations[random.Next(_destinations.Length)].Split(',')[1].Trim()
                         },
                         
                         // Package information
-                        Weight = _random.Next(50, 1000),
-                        Category = _cargoTypes[_random.Next(_cargoTypes.Length)],
-                        Priority = priorities[_random.Next(priorities.Length)],
+                        Weight = random.Next(50, 1000),
+                        Category = _categories[random.Next(_categories.Length)],
+                        Priority = _priorities[random.Next(_priorities.Length)],
                         Description = $"Sample shipment #{i + 1}",
-                        HasInsurance = _random.Next(100) < 70, // 70% chance of having insurance
+                        HasInsurance = random.Next(100) < 70, // 70% chance of having insurance
                         
                         // Status and tracking
                         Status = status,
