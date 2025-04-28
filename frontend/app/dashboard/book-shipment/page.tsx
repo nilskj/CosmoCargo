@@ -60,7 +60,7 @@ const BookShipment = () => {
       });
 
       router.push("/dashboard/ongoing-shipments");
-    } catch (error) {
+    } catch {
       toast({
         title: "Ett fel uppstod",
         description: "Kunde inte boka frakten. Försök igen senare.",
