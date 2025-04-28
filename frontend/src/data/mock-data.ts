@@ -1,5 +1,3 @@
-import { ShipmentStatus } from '../model/types';
-
 export interface MockPilot {
     id: string;
     name: string;

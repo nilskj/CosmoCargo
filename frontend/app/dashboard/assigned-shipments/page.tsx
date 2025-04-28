@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Rocket, CheckCircle, AlertCircle } from "lucide-react";
-import { MOCK_ASSIGNED_SHIPMENTS, SHIPMENT_STATUS_MAP, MockShipment } from '../../../src/data/mock-data';
+import { MOCK_ASSIGNED_SHIPMENTS } from '../../../src/data/mock-data';
 
 const statusMap = {
   pending: { label: "Väntande", color: "bg-amber-500" },
