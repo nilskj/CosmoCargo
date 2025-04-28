@@ -16,10 +16,10 @@ namespace CosmoCargo.Data
         private static Guid DemoCustomerId;
         private static Guid DemoPilotId;
         private static Guid DemoAdminId;
-        private const int BatchSize = 100_000;
+        private const int BatchSize = 200_000;
         private const int MaxRetries = 3;
-        private const int MaxDegreeOfParallelism = 4;
-        private const int DeadlockRetryDelay = 1000;
+        private const int MaxDegreeOfParallelism = 5;
+        private const int DeadlockRetryDelay = 2000;
         private static readonly string[] _origins =
         [
             "Earth,Stockholm Station",
@@ -151,7 +151,7 @@ namespace CosmoCargo.Data
             Log("DATABASE: Seeding completed!");
         }
 
-        private static async Task BulkInsertUsersAsync(AppDbContext context, List<User> users)
+        private static async Task BulkInsertUsersAsync(AppDbContext context, User[] users)
         {
             var connection = (NpgsqlConnection)context.Database.GetDbConnection();
             if (connection.State != System.Data.ConnectionState.Open)
@@ -269,6 +269,8 @@ namespace CosmoCargo.Data
             await context.Users.AddRangeAsync(demoUsers);
             await context.SaveChangesAsync();
 
+            Log($"> Processed {demoUsers.Count:N0} demo users");
+
             Log("Demo customers seeded!");
         }
 
@@ -282,29 +284,51 @@ namespace CosmoCargo.Data
                 using var scope = serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                var customers = new List<User>(BatchSize);
-                var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalCustomers - batch * BatchSize);
+                var users = new User[batchSize];
+                var now = DateTime.UtcNow;
                 var random = new Random(Environment.TickCount + batch * 1000);
+
+                // Pre-generate all random data for the batch
+                var firstNameIndices = new int[batchSize];
+                var lastNameIndices = new int[batchSize];
+                var experienceIndices = new int[batchSize];
+                var industryIndices = new int[batchSize];
+                var isActiveFlags = new bool[batchSize];
+                var createdAts = new DateTime[batchSize];
+                var emails = new string[batchSize];
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var firstName = _firstNames[random.Next(_firstNames.Length)];
-                    var lastName = _lastNames[random.Next(_lastNames.Length)];
-                    var experience = $"{_experienceLevels[random.Next(_experienceLevels.Length)]} in {_industries[random.Next(_industries.Length)]}";
-                    var userNumber = batch * BatchSize + i + 1;
+                    firstNameIndices[i] = random.Next(_firstNames.Length);
+                    lastNameIndices[i] = random.Next(_lastNames.Length);
+                    experienceIndices[i] = random.Next(_experienceLevels.Length);
+                    industryIndices[i] = random.Next(_industries.Length);
+                    isActiveFlags[i] = random.Next(100) < 95;
+                    createdAts[i] = now.AddDays(-random.Next(0, 365));
+                    emails[i] = GenerateUniqueEmail(
+                        _firstNames[firstNameIndices[i]], 
+                        _lastNames[lastNameIndices[i]], 
+                        "example.com"
+                    );
+                }
 
-                    customers.Add(new User
+                for (int i = 0; i < batchSize; i++)
+                {
+                    var userNumber = batch * BatchSize + i + 1;
+                    var experience = $"{_experienceLevels[experienceIndices[i]]} in {_industries[industryIndices[i]]}";
+
+                    users[i] = new User
                     {
                         Id = Guid.NewGuid(),
-                        Name = $"{firstName} {lastName}",
-                        Email = GenerateUniqueEmail(firstName, lastName, "example.com"),
+                        Name = $"{_firstNames[firstNameIndices[i]]} {_lastNames[lastNameIndices[i]]}",
+                        Email = emails[i],
                         PasswordHash = Utils.Crypto.HashPassword($"Customer{userNumber}"),
                         Role = UserRole.Customer,
                         Experience = experience,
-                        IsActive = random.Next(100) < 95,
-                        CreatedAt = now.AddDays(-random.Next(0, 365))
-                    });
+                        IsActive = isActiveFlags[i],
+                        CreatedAt = createdAts[i]
+                    };
                 }
 
                 for (int retry = 0; retry < MaxRetries; retry++)
@@ -314,7 +338,7 @@ namespace CosmoCargo.Data
                         using var transaction = await context.Database.BeginTransactionAsync();
                         try
                         {
-                            await BulkInsertUsersAsync(context, customers);
+                            await BulkInsertUsersAsync(context, users);
                             await transaction.CommitAsync();
                             break;
                         }
@@ -357,29 +381,49 @@ namespace CosmoCargo.Data
                 using var scope = serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                var pilots = new List<User>(BatchSize);
-                var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalPilots - batch * BatchSize);
+                var users = new User[batchSize];
+                var now = DateTime.UtcNow;
                 var random = new Random(Environment.TickCount + batch * 1000);
+
+                // Pre-generate all random data for the batch
+                var firstNameIndices = new int[batchSize];
+                var lastNameIndices = new int[batchSize];
+                var experienceIndices = new int[batchSize];
+                var isActiveFlags = new bool[batchSize];
+                var createdAts = new DateTime[batchSize];
+                var emails = new string[batchSize];
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var firstName = _firstNames[random.Next(_firstNames.Length)];
-                    var lastName = _lastNames[random.Next(_lastNames.Length)];
-                    var experience = $"{_experienceLevels[random.Next(_experienceLevels.Length)]} of space piloting";
-                    var userNumber = batch * BatchSize + i + 1;
+                    firstNameIndices[i] = random.Next(_firstNames.Length);
+                    lastNameIndices[i] = random.Next(_lastNames.Length);
+                    experienceIndices[i] = random.Next(_experienceLevels.Length);
+                    isActiveFlags[i] = random.Next(100) < 90;
+                    createdAts[i] = now.AddDays(-random.Next(0, 365));
+                    emails[i] = GenerateUniqueEmail(
+                        _firstNames[firstNameIndices[i]], 
+                        _lastNames[lastNameIndices[i]], 
+                        "cosmocargo.com"
+                    );
+                }
 
-                    pilots.Add(new User
+                for (int i = 0; i < batchSize; i++)
+                {
+                    var userNumber = batch * BatchSize + i + 1;
+                    var experience = $"{_experienceLevels[experienceIndices[i]]} of space piloting";
+
+                    users[i] = new User
                     {
                         Id = Guid.NewGuid(),
-                        Name = $"{firstName} {lastName}",
-                        Email = GenerateUniqueEmail(firstName, lastName, "cosmocargo.com"),
+                        Name = $"{_firstNames[firstNameIndices[i]]} {_lastNames[lastNameIndices[i]]}",
+                        Email = emails[i],
                         PasswordHash = Utils.Crypto.HashPassword($"Pilot{userNumber}"),
                         Role = UserRole.Pilot,
                         Experience = experience,
-                        IsActive = random.Next(100) < 90,
-                        CreatedAt = now.AddDays(-random.Next(0, 365))
-                    });
+                        IsActive = isActiveFlags[i],
+                        CreatedAt = createdAts[i]
+                    };
                 }
 
                 for (int retry = 0; retry < MaxRetries; retry++)
@@ -389,7 +433,7 @@ namespace CosmoCargo.Data
                         using var transaction = await context.Database.BeginTransactionAsync();
                         try
                         {
-                            await BulkInsertUsersAsync(context, pilots);
+                            await BulkInsertUsersAsync(context, users);
                             await transaction.CommitAsync();
                             break;
                         }
@@ -427,29 +471,49 @@ namespace CosmoCargo.Data
                 using var scope = serviceProvider.CreateScope();
                 var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                var admins = new List<User>(BatchSize);
-                var now = DateTime.UtcNow;
                 var batchSize = Math.Min(BatchSize, TotalAdmins - batch * BatchSize);
+                var users = new User[batchSize];
+                var now = DateTime.UtcNow;
                 var random = new Random(Environment.TickCount + batch * 1000);
+
+                // Pre-generate all random data for the batch
+                var firstNameIndices = new int[batchSize];
+                var lastNameIndices = new int[batchSize];
+                var experienceIndices = new int[batchSize];
+                var isActiveFlags = new bool[batchSize];
+                var createdAts = new DateTime[batchSize];
+                var emails = new string[batchSize];
 
                 for (int i = 0; i < batchSize; i++)
                 {
-                    var firstName = _firstNames[random.Next(_firstNames.Length)];
-                    var lastName = _lastNames[random.Next(_lastNames.Length)];
-                    var experience = $"{_experienceLevels[random.Next(_experienceLevels.Length)]} in space logistics management";
-                    var userNumber = batch * BatchSize + i + 1;
+                    firstNameIndices[i] = random.Next(_firstNames.Length);
+                    lastNameIndices[i] = random.Next(_lastNames.Length);
+                    experienceIndices[i] = random.Next(_experienceLevels.Length);
+                    isActiveFlags[i] = random.Next(100) < 98;
+                    createdAts[i] = now.AddDays(-random.Next(0, 365));
+                    emails[i] = GenerateUniqueEmail(
+                        _firstNames[firstNameIndices[i]], 
+                        _lastNames[lastNameIndices[i]], 
+                        "cosmocargo.com"
+                    );
+                }
 
-                    admins.Add(new User
+                for (int i = 0; i < batchSize; i++)
+                {
+                    var userNumber = batch * BatchSize + i + 1;
+                    var experience = $"{_experienceLevels[experienceIndices[i]]} in space logistics management";
+
+                    users[i] = new User
                     {
                         Id = Guid.NewGuid(),
-                        Name = $"{firstName} {lastName}",
-                        Email = GenerateUniqueEmail(firstName, lastName, "cosmocargo.com"),
+                        Name = $"{_firstNames[firstNameIndices[i]]} {_lastNames[lastNameIndices[i]]}",
+                        Email = emails[i],
                         PasswordHash = Utils.Crypto.HashPassword($"Admin{userNumber}"),
                         Role = UserRole.Admin,
                         Experience = experience,
-                        IsActive = random.Next(100) < 98,
-                        CreatedAt = now.AddDays(-random.Next(0, 365))
-                    });
+                        IsActive = isActiveFlags[i],
+                        CreatedAt = createdAts[i]
+                    };
                 }
 
                 for (int retry = 0; retry < MaxRetries; retry++)
@@ -459,7 +523,7 @@ namespace CosmoCargo.Data
                         using var transaction = await context.Database.BeginTransactionAsync();
                         try
                         {
-                            await BulkInsertUsersAsync(context, admins);
+                            await BulkInsertUsersAsync(context, users);
                             await transaction.CommitAsync();
                             break;
                         }
