@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Package, ArrowRight } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const BookShipment = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +61,8 @@ const BookShipment = () => {
                     placeholder="Ditt namn"
                     className="space-input"
                     required
+                    value={user?.name || ""}
+                    disabled
                   />
                 </div>
 
@@ -70,6 +74,8 @@ const BookShipment = () => {
                     placeholder="din@email.com"
                     className="space-input"
                     required
+                    value={user?.email || ""}
+                    disabled
                   />
                 </div>
 
