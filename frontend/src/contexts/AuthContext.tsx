@@ -29,7 +29,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const router = useRouter();
 
-  // Check for stored auth on initial load
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {

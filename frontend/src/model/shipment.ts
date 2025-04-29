@@ -1,4 +1,5 @@
 import { ShipmentStatus } from './types';
+import User from './user';
 
 export interface ShipmentContact {
     name: string;
@@ -21,12 +22,5 @@ export default interface Shipment {
     status: ShipmentStatus;
     createdAt: string;
     updatedAt: string;
-}
-
-export interface PaginatedResult<T> {
-    items: T[];
-    totalCount: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
+    pilot?: User | null;
 }
