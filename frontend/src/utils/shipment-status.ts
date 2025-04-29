@@ -1,3 +1,4 @@
+import { UserRole } from '@/types/user';
 import { ShipmentStatus } from '../model/types';
 
 // Map backend numeric enum values to frontend string enum
@@ -55,3 +56,13 @@ export const getStatusColorClass = (status: ShipmentStatus): string => {
         default: return 'bg-gray-500';
     }
 }; 
+
+// Map backend numeric enum values to frontend string enum
+export const mapBackendRoleToFrontend = (role: number): UserRole => {
+    switch (role) {
+        case 0: return "customer";
+        case 1: return "pilot";
+        case 2: return "admin";
+        default: throw new Error(`Unknown user role: ${role}`);
+    }
+};

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { api } from "../services/api";
+import { mapBackendRoleToFrontend } from "@/utils/shipment-status";
 
 interface User {
   email: string;
@@ -56,6 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       
       const user = userResponse.data;
+      user.role = mapBackendRoleToFrontend(parseInt(user.role + ""));
       setUser(user);
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(user));
