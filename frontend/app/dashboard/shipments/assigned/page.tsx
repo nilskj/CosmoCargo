@@ -15,20 +15,33 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, AlertCircle, Loader } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { ShipmentStatus } from "@/model/types";
-import { getShipments, ShipmentsFilter, updateShipmentStatus } from "@/services/shipment-service";
-import { getStatusDisplayText, getStatusColorClass } from "@/utils/shipment-status";
+import {
+  getShipments,
+  ShipmentsFilter,
+  updateShipmentStatus,
+} from "@/services/shipment-service";
+import {
+  getStatusDisplayText,
+  getStatusColorClass,
+} from "@/utils/shipment-status";
 import Pagination from "@/components/ui/pagination";
+import { CustomsForm } from "@/model/shipment";
+import { getCustomsRiskLevel } from "@/utils/customs-risk";
 
 const AssignedShipments = () => {
   const { user } = useAuth();
   const [page, setPage] = useState(1);
-  
-  const { data: shipments, refetch, isLoading } = useQuery({
+
+  const {
+    data: shipments,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["shipments", page],
     queryFn: () => {
       const filter: ShipmentsFilter = {
         page,
-        pageSize: 10
+        pageSize: 10,
       };
       return getShipments(filter);
     },
@@ -47,10 +60,15 @@ const AssignedShipments = () => {
     );
   }
 
-  const handleUpdateStatus = async (shipmentId: string, newStatus: ShipmentStatus) => {
+  const handleUpdateStatus = async (
+    shipmentId: string,
+    newStatus: ShipmentStatus
+  ) => {
     await updateShipmentStatus(shipmentId, { status: newStatus });
     toast.success(
-      `Status uppdaterad för frakt ${shipmentId} till ${getStatusDisplayText(newStatus)}`
+      `Status uppdaterad för frakt ${shipmentId} till ${getStatusDisplayText(
+        newStatus
+      )}`
     );
     refetch();
   };
@@ -83,46 +101,80 @@ const AssignedShipments = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {shipments.items.map((shipment, ix) => (
-                <TableRow key={shipment.id}>
-                  <TableCell>{ix + 1}</TableCell>
-                  <TableCell>{shipment.sender.name}</TableCell>
-                  <TableCell>{shipment.sender.station + " @ " + shipment.sender.planet}</TableCell>
-                  <TableCell>{shipment.receiver.station + " @ " + shipment.receiver.planet}</TableCell>
-                  <TableCell>{shipment.category}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColorClass(shipment.status)}`}>
-                      {getStatusDisplayText(shipment.status)}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {shipment.status === "Assigned" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleUpdateStatus(shipment.id, ShipmentStatus.InTransit)
-                          }
-                        >
-                          Påbörja Transport
-                        </Button>
+              {shipments.items.map((shipment, ix) => {
+                const customsRisk = getCustomsRiskLevel(shipment.customs);
+                return (
+                  <TableRow key={shipment.id}>
+                    <TableCell>{ix + 1}</TableCell>
+                    <TableCell>{shipment.sender.name}</TableCell>
+                    <TableCell>
+                      {shipment.sender.station + " @ " + shipment.sender.planet}
+                    </TableCell>
+                    <TableCell>
+                      {shipment.receiver.station +
+                        " @ " +
+                        shipment.receiver.planet}
+                    </TableCell>
+                    <TableCell>{shipment.category}</TableCell>
+                    <TableCell>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColorClass(
+                          shipment.status
+                        )}`}
+                      >
+                        {getStatusDisplayText(shipment.status)}
+                      </span>
+                      {/* Customs risk badge */}
+                      {shipment.customs && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span
+                            className={`text-xs font-semibold ${customsRisk.color}`}
+                          >
+                            {customsRisk.emoji} Risk: {customsRisk.label}
+                          </span>
+                          {shipment.customs.quarantineRequired && (
+                            <span className="text-xs font-semibold text-pink-600 ml-2">
+                              Karantän krävs
+                            </span>
+                          )}
+                        </div>
                       )}
-                      {shipment.status === "InTransit" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleUpdateStatus(shipment.id, ShipmentStatus.Delivered)
-                          }
-                        >
-                          Markera Levererad
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {shipment.status === "Assigned" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleUpdateStatus(
+                                shipment.id,
+                                ShipmentStatus.InTransit
+                              )
+                            }
+                          >
+                            Påbörja Transport
+                          </Button>
+                        )}
+                        {shipment.status === "InTransit" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleUpdateStatus(
+                                shipment.id,
+                                ShipmentStatus.Delivered
+                              )
+                            }
+                          >
+                            Markera Levererad
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>

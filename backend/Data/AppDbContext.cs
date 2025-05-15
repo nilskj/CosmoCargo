@@ -76,6 +76,17 @@ namespace CosmoCargo.Data
                 entity.Property(e => e.Status).IsRequired();
                 entity.Property(e => e.CreatedAt).IsRequired();
                 entity.Property(e => e.UpdatedAt).IsRequired();
+
+                entity.ComplexProperty(e => e.Customs, customs =>
+                {
+                    customs.Property(c => c.ContainsLifeforms).IsRequired().HasColumnName("customs_contains_lifeforms");
+                    customs.Property(c => c.LifeformType).HasColumnName("customs_lifeform_type");
+                    customs.Property(c => c.IsPlasmaActive).IsRequired().HasColumnName("customs_is_plasma_active");
+                    customs.Property(c => c.PlasmaStabilityLevel).HasColumnName("customs_plasma_stability_level");
+                    customs.Property(c => c.OriginPlanetLawsConfirmed).IsRequired().HasColumnName("customs_origin_planet_laws_confirmed");
+                    customs.Property(c => c.CustomsNotes).HasColumnName("customs_notes");
+                    customs.Property(c => c.QuarantineRequired).HasColumnName("customs_quarantine_required");
+                });
             });
         }
     }

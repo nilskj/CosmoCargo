@@ -81,6 +81,7 @@ namespace CosmoCargo.Endpoints
                 Priority = request.Priority,
                 Description = request.Description,
                 HasInsurance = request.HasInsurance,
+                Customs = request.Customs ?? new CustomsForm(),
             };
 
             var createdShipment = await shipmentService.CreateShipmentAsync(shipment);
@@ -145,6 +146,7 @@ namespace CosmoCargo.Endpoints
         public string Priority { get; set; } = string.Empty;
         public string? Description { get; set; }
         public bool HasInsurance { get; set; }
+        public CustomsForm Customs { get; set; } = new();
     }
 
     public class UpdateShipmentStatusRequest

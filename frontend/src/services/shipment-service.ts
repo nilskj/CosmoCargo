@@ -1,5 +1,5 @@
 import { api } from "./api";
-import Shipment, { ShipmentContact } from "../model/shipment";
+import Shipment, { ShipmentContact, CustomsForm } from "../model/shipment";
 import { ShipmentStatus } from "../model/types";
 import { mapBackendStatusToFrontend, mapFrontendStatusToBackend } from "../utils/shipment-status";
 import { PaginatedResult } from "@/model/paginated-result";
@@ -12,6 +12,7 @@ export interface CreateShipmentRequest {
     priority: string;
     description?: string | null;
     hasInsurance: boolean;
+    customs?: CustomsForm;
 }
 
 export interface UpdateShipmentStatusRequest {

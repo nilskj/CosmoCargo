@@ -8,6 +8,16 @@ export interface ShipmentContact {
     station: string;
 }
 
+export interface CustomsForm {
+    containsLifeforms: boolean;
+    lifeformType?: string | null;
+    isPlasmaActive: boolean;
+    plasmaStabilityLevel?: number | null;
+    originPlanetLawsConfirmed: boolean;
+    customsNotes?: string | null;
+    quarantineRequired?: boolean | null;
+}
+
 export default interface Shipment {
     id: string;
     customerId: string;
@@ -23,4 +33,5 @@ export default interface Shipment {
     createdAt: string;
     updatedAt: string;
     pilot?: User | null;
+    customs?: CustomsForm;
 }

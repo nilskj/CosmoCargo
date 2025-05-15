@@ -17,20 +17,89 @@ import { Package, ArrowRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { createShipment } from "@/services/shipment-service";
 import { useRouter } from "next/navigation";
+import { CustomsForm } from "@/model/shipment";
+import { getCustomsRiskLevel } from "@/utils/customs-risk";
 
 const BookShipment = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customsErrors, setCustomsErrors] = useState<{ [key: string]: string }>(
+    {}
+  );
+  const [containsLifeforms, setContainsLifeforms] = useState(false);
+  const [lifeformType, setLifeformType] = useState("");
+  const [isPlasmaActive, setIsPlasmaActive] = useState(false);
+  const [plasmaStabilityLevel, setPlasmaStabilityLevel] = useState<
+    number | undefined
+  >(undefined);
+  const [quarantineRequired, setQuarantineRequired] = useState(false);
+  const [originPlanetLawsConfirmed, setOriginPlanetLawsConfirmed] =
+    useState(false);
+  const [customsNotes, setCustomsNotes] = useState("");
+
+  const validateCustoms = (c: CustomsForm) => {
+    const errors: { [key: string]: string } = {};
+    if (c.containsLifeforms && !c.lifeformType) {
+      errors.lifeformType = "Artbeskrivning krävs om levande varelser finns.";
+    }
+    if (
+      c.isPlasmaActive &&
+      (c.plasmaStabilityLevel === undefined ||
+        c.plasmaStabilityLevel === null ||
+        isNaN(Number(c.plasmaStabilityLevel)))
+    ) {
+      errors.plasmaStabilityLevel =
+        "Stabilitetsskala krävs om plasmaaktivt material finns.";
+    }
+    if (
+      c.isPlasmaActive &&
+      typeof c.plasmaStabilityLevel === "number" &&
+      (c.plasmaStabilityLevel < 1 || c.plasmaStabilityLevel > 10)
+    ) {
+      errors.plasmaStabilityLevel =
+        "Stabilitetsskala måste vara mellan 1 och 10.";
+    }
+    if (
+      c.isPlasmaActive &&
+      typeof c.plasmaStabilityLevel === "number" &&
+      c.plasmaStabilityLevel < 4 &&
+      c.quarantineRequired !== true
+    ) {
+      errors.quarantineRequired = "Karantän krävs om stabilitet < 4.";
+    }
+    if (!c.originPlanetLawsConfirmed) {
+      errors.originPlanetLawsConfirmed = "Du måste intyga laglig export.";
+    }
+    return errors;
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    const customs: CustomsForm = {
+      containsLifeforms,
+      lifeformType: containsLifeforms ? lifeformType : undefined,
+      isPlasmaActive,
+      plasmaStabilityLevel: isPlasmaActive ? plasmaStabilityLevel : undefined,
+      originPlanetLawsConfirmed,
+      customsNotes: customsNotes || undefined,
+      quarantineRequired:
+        isPlasmaActive &&
+        typeof plasmaStabilityLevel === "number" &&
+        plasmaStabilityLevel < 4
+          ? quarantineRequired
+          : undefined,
+    };
+    const customsValidation = validateCustoms(customs);
+    setCustomsErrors(customsValidation);
+    if (Object.keys(customsValidation).length > 0) {
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const formData = new FormData(e.currentTarget);
-      
       const shipmentData = {
         origin: {
           name: user?.name || "",
@@ -49,16 +118,14 @@ const BookShipment = () => {
         priority: formData.get("package-priority") as string,
         description: formData.get("package-description") as string,
         hasInsurance: formData.get("insurance") === "on",
+        customs: customs,
       };
-
       await createShipment(shipmentData);
-
       toast({
         title: "Frakt bokad",
         description: "Din frakt har bokats och väntar på godkännande.",
         variant: "default",
       });
-
       router.push("/dashboard/shipments/ongoing");
     } catch {
       toast({
@@ -70,6 +137,21 @@ const BookShipment = () => {
       setIsSubmitting(false);
     }
   };
+
+  const customsRisk = getCustomsRiskLevel({
+    containsLifeforms,
+    lifeformType: containsLifeforms ? lifeformType : undefined,
+    isPlasmaActive,
+    plasmaStabilityLevel: isPlasmaActive ? plasmaStabilityLevel : undefined,
+    originPlanetLawsConfirmed,
+    customsNotes: customsNotes || undefined,
+    quarantineRequired:
+      isPlasmaActive &&
+      typeof plasmaStabilityLevel === "number" &&
+      plasmaStabilityLevel < 4
+        ? quarantineRequired
+        : undefined,
+  });
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -286,9 +368,127 @@ const BookShipment = () => {
               </div>
             </div>
 
+            <div className="border-t border-space-secondary/30 pt-6">
+              <h3 className="text-lg font-medium mb-4">Tullformulär</h3>
+              <div className="mb-4">
+                <span className={`font-semibold ${customsRisk.color}`}>
+                  {customsRisk.emoji} Risknivå: {customsRisk.label}
+                </span>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="customs-containsLifeforms"
+                    checked={containsLifeforms}
+                    onCheckedChange={setContainsLifeforms}
+                  />
+                  <Label htmlFor="customs-containsLifeforms">
+                    Innehåller levande varelser
+                  </Label>
+                </div>
+                {containsLifeforms && (
+                  <div className="space-y-2 ml-6">
+                    <Label htmlFor="customs-lifeformType">
+                      Art, intelligens, riskklass *
+                    </Label>
+                    <Input
+                      id="customs-lifeformType"
+                      value={lifeformType}
+                      onChange={(e) => setLifeformType(e.target.value)}
+                      required
+                    />
+                    {customsErrors.lifeformType && (
+                      <span className="text-destructive text-sm">
+                        {customsErrors.lifeformType}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="customs-isPlasmaActive"
+                    checked={isPlasmaActive}
+                    onCheckedChange={setIsPlasmaActive}
+                  />
+                  <Label htmlFor="customs-isPlasmaActive">
+                    Innehåller plasma-aktiva material
+                  </Label>
+                </div>
+                {isPlasmaActive && (
+                  <div className="space-y-2 ml-6">
+                    <Label htmlFor="customs-plasmaStabilityLevel">
+                      Stabilitetsskala (1–10) *
+                    </Label>
+                    <Input
+                      id="customs-plasmaStabilityLevel"
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={plasmaStabilityLevel ?? ""}
+                      onChange={(e) =>
+                        setPlasmaStabilityLevel(
+                          e.target.value ? Number(e.target.value) : undefined
+                        )
+                      }
+                      required
+                    />
+                    {customsErrors.plasmaStabilityLevel && (
+                      <span className="text-destructive text-sm">
+                        {customsErrors.plasmaStabilityLevel}
+                      </span>
+                    )}
+                    {typeof plasmaStabilityLevel === "number" &&
+                      plasmaStabilityLevel < 4 && (
+                        <div className="flex items-center space-x-2 mt-2">
+                          <Checkbox
+                            id="customs-quarantineRequired"
+                            checked={quarantineRequired}
+                            onCheckedChange={setQuarantineRequired}
+                          />
+                          <Label htmlFor="customs-quarantineRequired">
+                            Karantän krävs (stabilitet &lt; 4)
+                          </Label>
+                          {customsErrors.quarantineRequired && (
+                            <span className="text-destructive text-sm ml-2">
+                              {customsErrors.quarantineRequired}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                  </div>
+                )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="customs-originPlanetLawsConfirmed"
+                    checked={originPlanetLawsConfirmed}
+                    onCheckedChange={setOriginPlanetLawsConfirmed}
+                    required
+                  />
+                  <Label htmlFor="customs-originPlanetLawsConfirmed">
+                    Jag intygar laglig export *
+                  </Label>
+                  {customsErrors.originPlanetLawsConfirmed && (
+                    <span className="text-destructive text-sm ml-2">
+                      {customsErrors.originPlanetLawsConfirmed}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="customs-customsNotes">
+                    Frivillig kommentar
+                  </Label>
+                  <Input
+                    id="customs-customsNotes"
+                    value={customsNotes}
+                    onChange={(e) => setCustomsNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="border-t border-space-secondary/30 pt-6 flex justify-end">
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="space-button"
                 disabled={isSubmitting}
               >

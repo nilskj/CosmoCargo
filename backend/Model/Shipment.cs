@@ -20,6 +20,9 @@ namespace CosmoCargo.Model
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
 
+        // Customs
+        public CustomsForm Customs { get; set; } = new();
+
         // Navigation properties
         public virtual User Customer { get; set; } = null!;
         public virtual User? Pilot { get; set; }
